@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title id="doc-title">KITKLASH — Archive</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/png" href="assets/img/logo.png"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;overflow-x:hidden;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}@media (max-width:640px){.text-display-xl{font-size:42px!important;line-height:46px!important;}.text-headline-lg{font-size:32px!important;line-height:38px!important;}}</style>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="assets/js/tailwind-config.js"></script>
+</head>
+<body class="bg-pitch-black font-body-md text-body-md text-on-surface">
+<div id="site-header"></div>
+<main class="w-full pt-20 bg-pitch-black">
+<div class="flex flex-col w-full bg-pitch-black" id="product-root">
+<!-- Filled by JS -->
+</div>
+</main>
+<div id="site-footer"></div>
+
+<script src="assets/js/products.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(location.search);
+  const slug = params.get("slug") || "france-2006-away-zidane";
+  const p = getProductBySlug(slug) || PRODUCTS[0];
+  document.getElementById("doc-title").textContent = p.name + " — KITKLASH";
+
+  const gallery = p.gallery && p.gallery.length ? p.gallery : [p.img];
+  let selectedSize = p.sizes[0] || null;
+  const versions = getVersions(p);
+  let selectedVersion = versions[0];
+
+  const root = document.getElementById("product-root");
+  root.innerHTML = `
+  <section class="max-w-container-max mx-auto w-full px-margin-mobile lg:px-margin-desktop py-12 lg:py-24">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
+      <div class="lg:col-span-7 flex flex-col gap-4">
+        <div class="w-full aspect-[4/5] bg-charcoal-depth rounded-sm overflow-hidden relative group">
+          <img id="main-image" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src="${gallery[0]}"/>
+        </div>
+        <div id="thumbs" class="grid grid-cols-4 gap-4">
+          ${gallery
+            .map(
+              (src, i) => `
+            <button data-src="${src}" class="thumb-btn w-full aspect-square bg-charcoal-depth border ${i === 0 ? "border-primary" : "border-stadium-grey hover:border-outline"} overflow-hidden focus:outline-none rounded-sm transition-colors group">
+              <img class="w-full h-full object-cover ${i === 0 ? "opacity-100" : "opacity-60 group-hover:opacity-100"} transition-opacity" src="${src}"/>
+            </button>`
+            )
+            .join("")}
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 relative">
+        <div class="sticky top-32 flex flex-col gap-10">
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-3">
+              <span class="font-label-sm text-label-sm text-outline tracking-widest uppercase">${p.team} · ${p.year}</span>
+              ${p.badge ? `<span class="px-2 py-1 border border-stadium-grey font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest text-[10px]">${p.badge}</span>` : ""}
+            </div>
+            <h1 class="font-display-xl text-display-xl text-primary leading-[0.9] mt-2 uppercase break-words">${p.name}</h1>
+            <p class="font-price-display text-price-display text-primary mt-4">${formatPrice(p.price)}</p>
+          </div>
+          <hr class="border-t border-stadium-grey w-full"/>
+          ${versions.length > 1 ? `
+          <div class="flex flex-col gap-4">
+            <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Select Version</h3>
+            <div class="grid grid-cols-2 gap-3" id="version-select">
+              ${versions
+                .map(
+                  v => `<button data-version="${v}" class="version-opt py-4 border font-label-sm text-label-sm uppercase transition-colors ${v === selectedVersion ? "border-primary text-primary bg-charcoal-depth" : "border-stadium-grey text-on-surface-variant hover:border-primary hover:text-primary"}">${versionLabel(v)}</button>`
+                )
+                .join("")}
+            </div>
+          </div>
+          ` : ""}
+          <div class="flex flex-col gap-4">
+            <div class="flex justify-between items-center">
+              <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Select Size</h3>
+              <button type="button" class="size-guide-trigger font-label-sm text-label-sm text-outline hover:text-primary transition-colors underline underline-offset-4 decoration-stadium-grey hover:decoration-primary">Size Guide</button>
+            </div>
+            <span class="font-label-sm text-label-sm text-outline -mt-2">${p.condition}</span>
+            <div class="grid grid-cols-3 gap-3" id="size-select">
+              ${["S", "M", "L", "XL", "XXL"]
+                .map(sz => {
+                  const available = p.sizes.includes(sz);
+                  const active = sz === selectedSize;
+                  return `<button data-size="${sz}" ${available ? "" : "disabled"} class="size-opt py-4 border font-label-sm text-label-sm uppercase transition-colors
+                    ${!available ? "border-stadium-grey text-on-surface-variant opacity-30 cursor-not-allowed" : active ? "border-primary text-primary bg-charcoal-depth" : "border-stadium-grey text-on-surface-variant hover:border-primary hover:text-primary"}">${sz}</button>`;
+                })
+                .join("")}
+            </div>
+            ${p.soldOut ? `<p class="font-label-sm text-label-sm text-kit-accent-red tracking-widest uppercase mt-2">Sold Out</p>` : `<p class="font-label-sm text-label-sm text-kit-accent-red tracking-widest uppercase mt-2">1 Available</p>`}
+          </div>
+          <div class="flex flex-col gap-3 mt-4">
+            <button id="add-to-cart" ${p.soldOut ? "disabled" : ""} class="w-full py-5 ${p.soldOut ? "bg-surface-container-high text-on-surface-variant cursor-not-allowed" : "bg-primary text-pitch-black hover:bg-surface-tint"} font-label-sm text-label-sm tracking-widest uppercase transition-colors flex items-center justify-center gap-2 group">
+              <span>${p.soldOut ? "Sold Out" : "Add to Cart"}</span>
+              ${p.soldOut ? "" : `<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_right_alt</span>`}
+            </button>
+            <button id="buy-now" ${p.soldOut ? "disabled" : ""} class="w-full py-5 border border-primary text-primary bg-transparent font-label-sm text-label-sm tracking-widest uppercase transition-colors hover:bg-charcoal-depth ${p.soldOut ? "opacity-30 cursor-not-allowed" : ""}">Buy Now</button>
+          </div>
+          <div class="flex flex-col mt-8 border-t border-stadium-grey">
+            <div class="group border-b border-stadium-grey">
+              <button class="accordion-toggle w-full py-6 flex justify-between items-center focus:outline-none">
+                <span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">The Story</span>
+                <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors icon">remove</span>
+              </button>
+              <div class="accordion-panel pb-6 pr-4">
+                <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">${p.story}</p>
+              </div>
+            </div>
+            <div class="group border-b border-stadium-grey">
+              <button class="accordion-toggle w-full py-6 flex justify-between items-center focus:outline-none">
+                <span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Details &amp; Condition</span>
+                <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors icon">add</span>
+              </button>
+              <div class="accordion-panel pb-6 hidden">
+                <ul class="flex flex-col gap-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">
+                  <li class="flex justify-between border-b border-charcoal-depth pb-2"><span>Era</span><span class="text-primary">${p.year}</span></li>
+                  <li class="flex justify-between border-b border-charcoal-depth pb-2"><span>Brand</span><span class="text-primary">${p.brand}</span></li>
+                  <li class="flex justify-between border-b border-charcoal-depth pb-2"><span>Condition</span><span class="text-primary">${p.condition}</span></li>
+                  <li class="flex justify-between border-b border-charcoal-depth pb-2"><span>Authenticity</span><span class="text-primary">${p.authenticity}</span></li>
+                </ul>
+              </div>
+            </div>
+            <div class="group border-b border-stadium-grey">
+              <button class="accordion-toggle w-full py-6 flex justify-between items-center focus:outline-none">
+                <span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Shipping &amp; Returns</span>
+                <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors icon">add</span>
+              </button>
+              <div class="accordion-panel pb-6 hidden">
+                <p class="font-body-md text-body-md text-on-surface-variant">Complimentary express worldwide shipping on archival pieces. Due to the rare nature of these items, returns are only accepted within 7 days of delivery, provided the security tag remains attached and intact.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="w-full h-[1px] bg-stadium-grey my-12"></div>
+
+  <section class="max-w-container-max mx-auto w-full px-margin-mobile lg:px-margin-desktop py-12 lg:py-24">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+      <h2 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tighter">You Might<br/>Also Like</h2>
+      <a class="font-label-sm text-label-sm text-primary tracking-widest uppercase border-b border-primary pb-1 hover:text-on-surface-variant hover:border-on-surface-variant transition-colors inline-block" href="shop.html">View All Archives</a>
+    </div>
+    <div id="related-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+  </section>
+  `;
+
+  // Thumbnails
+  root.querySelectorAll(".thumb-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.getElementById("main-image").src = btn.dataset.src;
+      root.querySelectorAll(".thumb-btn").forEach(b => {
+        b.classList.remove("border-primary");
+        b.classList.add("border-stadium-grey");
+        b.querySelector("img").classList.remove("opacity-100");
+        b.querySelector("img").classList.add("opacity-60");
+      });
+      btn.classList.remove("border-stadium-grey");
+      btn.classList.add("border-primary");
+      btn.querySelector("img").classList.remove("opacity-60");
+      btn.querySelector("img").classList.add("opacity-100");
+    });
+  });
+
+  // Version selection
+  root.querySelectorAll(".version-opt").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedVersion = btn.dataset.version;
+      root.querySelectorAll(".version-opt").forEach(b => {
+        b.classList.remove("border-primary", "text-primary", "bg-charcoal-depth");
+        b.classList.add("border-stadium-grey", "text-on-surface-variant");
+      });
+      btn.classList.add("border-primary", "text-primary", "bg-charcoal-depth");
+      btn.classList.remove("border-stadium-grey", "text-on-surface-variant");
+    });
+  });
+
+  // Size selection
+  root.querySelectorAll(".size-opt:not(:disabled)").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedSize = btn.dataset.size;
+      root.querySelectorAll(".size-opt").forEach(b => {
+        b.classList.remove("border-primary", "text-primary", "bg-charcoal-depth");
+        if (!b.disabled) b.classList.add("border-stadium-grey", "text-on-surface-variant");
+      });
+      btn.classList.add("border-primary", "text-primary", "bg-charcoal-depth");
+      btn.classList.remove("border-stadium-grey", "text-on-surface-variant");
+    });
+  });
+
+  // Accordions
+  root.querySelectorAll(".accordion-toggle").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const panel = btn.nextElementSibling;
+      const icon = btn.querySelector(".icon");
+      panel.classList.toggle("hidden");
+      icon.textContent = icon.textContent === "add" ? "remove" : "add";
+    });
+  });
+
+  // Cart actions
+  document.getElementById("add-to-cart")?.addEventListener("click", () => {
+    if (!selectedSize) return;
+    addToCart(p.slug, selectedSize, 1, selectedVersion);
+  });
+  document.getElementById("buy-now")?.addEventListener("click", () => {
+    if (!selectedSize) return;
+    addToCart(p.slug, selectedSize, 1, selectedVersion);
+    window.location.href = "checkout.html";
+  });
+
+  // Related products
+  const related = PRODUCTS.filter(x => x.slug !== p.slug && x.category === p.category).slice(0, 4);
+  const fallback = PRODUCTS.filter(x => x.slug !== p.slug && !related.includes(x)).slice(0, 4 - related.length);
+  document.getElementById("related-grid").innerHTML = related
+    .concat(fallback)
+    .map(
+      r => `
+    <a class="group flex flex-col gap-4" href="product.html?slug=${r.slug}">
+      <div class="w-full aspect-[3/4] bg-charcoal-depth overflow-hidden rounded-sm relative">
+        <img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src="${r.img}" alt="${r.name}"/>
+        ${r.badge ? `<div class="absolute top-4 left-4 px-2 py-1 border border-stadium-grey bg-pitch-black/50 backdrop-blur-md font-label-sm text-label-sm text-primary text-[10px] uppercase tracking-widest">${r.badge}</div>` : ""}
+      </div>
+      <div class="flex flex-col gap-1">
+        <h4 class="font-label-sm text-label-sm text-on-surface-variant tracking-widest uppercase">${r.team} · ${r.year}</h4>
+        <h3 class="font-body-lg text-body-lg text-primary uppercase">${r.name}</h3>
+        <p class="font-price-display text-price-display text-primary mt-1">${formatPrice(r.price)}</p>
+      </div>
+    </a>`
+    )
+    .join("");
+});
+</script>
+</body>
+</html>

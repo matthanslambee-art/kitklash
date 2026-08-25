@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Checkout — KITKLASH</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/png" href="assets/img/logo.png"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;overflow-x:hidden;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}@media (max-width:640px){.text-display-xl{font-size:42px!important;line-height:46px!important;}.text-headline-lg{font-size:32px!important;line-height:38px!important;}}</style>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="assets/js/tailwind-config.js"></script>
+</head>
+<body class="bg-pitch-black font-body-md text-body-md text-on-surface">
+<div id="site-header"></div>
+<main class="w-full pt-20 bg-pitch-black">
+<div class="flex flex-col w-full">
+
+<section class="w-full pt-24 lg:pt-32 pb-16 border-b border-stadium-grey">
+<div class="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop flex flex-col gap-6">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Secure Checkout</span>
+<h1 class="font-display-xl text-display-xl text-primary uppercase tracking-tighter">Checkout</h1>
+</div>
+</section>
+
+<section class="w-full py-16">
+<div class="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+  <form id="checkout-form" class="lg:col-span-7 flex flex-col gap-10">
+    <div class="flex flex-col gap-6">
+      <h2 class="font-label-sm text-label-sm text-primary uppercase tracking-widest border-b border-stadium-grey pb-4">Contact</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+        <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">First Name *</label>
+          <input required id="co-firstName" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
+        </div>
+        <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Surname *</label>
+          <input required id="co-surname" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
+        </div>
+        <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Email *</label>
+          <input required id="co-email" type="email" class="bg-transparent w-full pb-3 text-primary outline-none"/>
+        </div>
+        <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Phone / WhatsApp</label>
+          <input id="co-phone" type="text" placeholder="Optional" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-6">
+      <h2 class="font-label-sm text-label-sm text-primary uppercase tracking-widest border-b border-stadium-grey pb-4">Delivery Address</h2>
+      <div class="grid grid-cols-1 gap-8">
+        <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Street Address *</label>
+          <input required id="co-address" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-8">
+          <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+            <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">City *</label>
+            <input required id="co-city" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
+          </div>
+          <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+            <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Postal Code *</label>
+            <input required id="co-postal" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
+          </div>
+          <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+            <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Country *</label>
+            <input required id="co-country" type="text" value="South Africa" class="bg-transparent w-full pb-3 text-primary outline-none"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <button type="submit" id="checkout-submit" class="bg-primary text-pitch-black font-label-sm text-label-sm px-8 py-5 uppercase tracking-widest hover:bg-surface-tint transition-colors border border-primary w-full flex items-center justify-center gap-2">
+        <span id="checkout-submit-label">Place Order Via WhatsApp</span>
+      </button>
+      <p id="checkout-error" class="font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest hidden"></p>
+      <p class="font-label-sm text-label-sm text-outline text-[10px] uppercase tracking-widest text-center">We'll open WhatsApp with your order ready to send — we'll confirm details and arrange payment directly with you from there.</p>
+    </div>
+  </form>
+
+  <div class="lg:col-span-5">
+    <div class="border border-stadium-grey p-8 flex flex-col gap-6 sticky top-32">
+      <h2 class="font-label-sm text-label-sm text-primary uppercase tracking-widest border-b border-stadium-grey pb-4">Order Summary</h2>
+      <div id="checkout-items" class="flex flex-col gap-6"></div>
+      <hr class="border-t border-stadium-grey"/>
+      <div class="flex justify-between font-label-sm text-label-sm text-primary uppercase tracking-widest">
+        <span>Subtotal</span>
+        <span id="checkout-subtotal">R0</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="checkout-success" class="hidden max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop">
+  <div class="max-w-2xl flex flex-col gap-4 py-8">
+    <span class="material-symbols-outlined text-primary text-5xl">check_circle</span>
+    <h2 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tighter">Almost There</h2>
+    <p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">We've opened WhatsApp with your order ready to go — just hit send there and we'll confirm your order and arrange payment with you directly.</p>
+    <a href="shop.html" class="font-label-sm text-label-sm text-primary uppercase tracking-widest hover:text-surface-tint border-b border-primary w-fit pb-1 mt-2">Continue Browsing</a>
+  </div>
+</div>
+
+</section>
+
+</div>
+</main>
+<div id="site-footer"></div>
+
+<script src="assets/js/products.js"></script>
+<script src="assets/js/orders.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const cart = getCart();
+  const itemsHost = document.getElementById("checkout-items");
+  const form = document.getElementById("checkout-form");
+  const errorEl = document.getElementById("checkout-error");
+  const submitBtn = document.getElementById("checkout-submit");
+  const submitLabel = document.getElementById("checkout-submit-label");
+
+  if (!cart.length) {
+    itemsHost.innerHTML = `<p class="font-body-md text-body-md text-on-surface-variant">Your bag is empty.</p>`;
+    submitBtn.disabled = true;
+    submitBtn.classList.add("opacity-30", "cursor-not-allowed");
+  } else {
+    itemsHost.innerHTML = cart
+      .map(item => {
+        const p = getProductBySlug(item.slug);
+        if (!p) return "";
+        return `
+        <div class="flex gap-4">
+          <div class="w-16 h-20 bg-surface-container-low overflow-hidden border border-stadium-grey shrink-0">
+            <img src="${p.img}" class="w-full h-full object-cover" alt="${p.name}"/>
+          </div>
+          <div class="flex-1 flex flex-col gap-1">
+            <div class="flex justify-between gap-2">
+              <span class="font-body-md text-body-md text-primary">${p.name}</span>
+              <span class="font-price-display text-price-display text-primary whitespace-nowrap">${formatPrice(p.price * item.qty)}</span>
+            </div>
+            <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Size ${item.size}${item.version ? " · " + versionLabel(item.version) : ""} · Qty ${item.qty}</span>
+          </div>
+        </div>`;
+      })
+      .join("");
+  }
+  document.getElementById("checkout-subtotal").textContent = formatPrice(cartSubtotal());
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    if (!cart.length) return;
+    errorEl.classList.add("hidden");
+
+    const customer = {
+      firstName: document.getElementById("co-firstName").value.trim(),
+      surname: document.getElementById("co-surname").value.trim(),
+      email: document.getElementById("co-email").value.trim(),
+      phone: document.getElementById("co-phone").value.trim(),
+      address: [
+        document.getElementById("co-address").value.trim(),
+        document.getElementById("co-city").value.trim(),
+        document.getElementById("co-postal").value.trim(),
+        document.getElementById("co-country").value.trim()
+      ]
+        .filter(Boolean)
+        .join(", ")
+    };
+
+    if (!customer.firstName || !customer.surname || !customer.email || !customer.address) {
+      errorEl.textContent = "Please fill in all required fields.";
+      errorEl.classList.remove("hidden");
+      return;
+    }
+
+    const itemLines = cart.map(item => {
+      const p = getProductBySlug(item.slug);
+      if (!p) return null;
+      const variant = [item.size, item.version ? versionLabel(item.version) : null].filter(Boolean).join(" / ");
+      return `${item.qty}x ${p.name} (${variant}) — ${formatPrice(p.price * item.qty)}`;
+    }).filter(Boolean);
+
+    const order = saveNewOrder({
+      ...customer,
+      items: itemLines,
+      total: formatPrice(cartSubtotal())
+    });
+    window.open(buildOrderWhatsAppLink(order), "_blank");
+
+    saveCart([]);
+    form.classList.add("hidden");
+    const success = document.getElementById("checkout-success");
+    success.classList.remove("hidden");
+    success.classList.add("flex", "flex-col");
+  });
+});
+</script>
+</body>
+</html>

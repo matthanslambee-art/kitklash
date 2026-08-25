@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Shop All — KITKLASH</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/png" href="assets/img/logo.png"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;overflow-x:hidden;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}@media (max-width:640px){.text-display-xl{font-size:42px!important;line-height:46px!important;}.text-headline-lg{font-size:32px!important;line-height:38px!important;}}</style>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="assets/js/tailwind-config.js"></script>
+</head>
+<body class="bg-pitch-black font-body-md text-body-md text-on-surface">
+<div id="site-header"></div>
+<main class="w-full pt-20 bg-pitch-black">
+<div class="flex flex-col w-full">
+
+<div class="px-margin-mobile lg:px-margin-desktop py-24 lg:py-32 flex flex-col md:flex-row justify-between items-baseline border-b border-stadium-grey">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-4">Archive 01</span>
+<h1 id="shop-title" class="font-display-xl text-display-xl text-primary uppercase break-words w-full">The Collection</h1>
+</div>
+<div class="mt-8 md:mt-0 font-label-sm text-label-sm text-on-surface-variant tracking-widest uppercase">
+Showing <span id="shop-count" class="text-primary font-bold">0</span> Artifacts
+</div>
+</div>
+
+<div class="flex flex-col lg:flex-row w-full max-w-container-max mx-auto">
+<aside id="shop-filters-desktop" class="w-full lg:w-1/4 xl:w-1/5 border-r border-stadium-grey hidden lg:block sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto no-scrollbar">
+<div class="p-8 flex flex-col gap-12">
+<div class="flex flex-col gap-6 border-b border-stadium-grey pb-8">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">League</label>
+<div class="flex flex-col gap-4" id="league-filters">
+<label class="flex items-center gap-4 cursor-pointer group">
+<input type="checkbox" class="league-check w-4 h-4 accent-white" value="premier-league"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Premier League</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input type="checkbox" class="league-check w-4 h-4 accent-white" value="la-liga"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">La Liga</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input type="checkbox" class="league-check w-4 h-4 accent-white" value="serie-a"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Serie A</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input type="checkbox" class="league-check w-4 h-4 accent-white" value="bundesliga"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Bundesliga</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input type="checkbox" class="league-check w-4 h-4 accent-white" value="ligue-1"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Ligue 1</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input type="checkbox" class="league-check w-4 h-4 accent-white" value="other-european"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Other European Leagues</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input type="checkbox" class="league-check w-4 h-4 accent-white" value="international"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">International / National Teams</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input type="checkbox" class="league-check w-4 h-4 accent-white" value="other-clubs"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Other Clubs</span>
+</label>
+</div>
+</div>
+<div class="flex flex-col gap-6 border-b border-stadium-grey pb-8">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Team</label>
+<div class="flex flex-col gap-3 max-h-64 overflow-y-auto no-scrollbar" id="team-filters"></div>
+</div>
+<div class="flex flex-col gap-6 border-b border-stadium-grey pb-8">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Size</label>
+<div class="grid grid-cols-3 gap-2" id="size-filters">
+<button data-size="S" class="size-btn py-2 border border-stadium-grey font-label-sm text-label-sm text-on-surface-variant hover:border-primary hover:text-primary transition-colors">S</button>
+<button data-size="M" class="size-btn py-2 border border-stadium-grey font-label-sm text-label-sm text-on-surface-variant hover:border-primary hover:text-primary transition-colors">M</button>
+<button data-size="L" class="size-btn py-2 border border-stadium-grey font-label-sm text-label-sm text-on-surface-variant hover:border-primary hover:text-primary transition-colors">L</button>
+<button data-size="XL" class="size-btn py-2 border border-stadium-grey font-label-sm text-label-sm text-on-surface-variant hover:border-primary hover:text-primary transition-colors">XL</button>
+</div>
+</div>
+</div>
+</aside>
+
+<div class="w-full lg:w-3/4 xl:w-4/5">
+<div class="flex justify-between items-center px-margin-mobile lg:px-12 py-6 border-b border-stadium-grey">
+<button id="mobile-filter-toggle" class="lg:hidden font-label-sm text-label-sm text-primary uppercase tracking-widest flex items-center gap-2 border border-stadium-grey px-4 py-2">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+Filter
+</button>
+<div class="hidden lg:flex gap-4 items-center flex-wrap" id="filter-chips"></div>
+<div class="flex items-center gap-4">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest hidden md:inline">Sort By</span>
+<select id="sort-select" class="bg-transparent border border-stadium-grey text-primary font-label-sm text-label-sm uppercase tracking-widest p-2 outline-none focus:border-primary cursor-pointer appearance-none pl-4 pr-8 relative">
+<option class="bg-pitch-black" value="newest">Newest Additions</option>
+<option class="bg-pitch-black" value="price_asc">Price: Low to High</option>
+<option class="bg-pitch-black" value="price_desc">Price: High to Low</option>
+<option class="bg-pitch-black" value="year">Year</option>
+</select>
+</div>
+</div>
+
+<!-- mobile filter panel -->
+<div id="mobile-filters" class="lg:hidden hidden flex-col gap-8 px-margin-mobile py-8 border-b border-stadium-grey">
+<div class="flex flex-col gap-4">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">League</label>
+<div class="flex flex-col gap-3" id="league-filters-mobile">
+<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="league-check w-4 h-4 accent-white" value="premier-league"/><span class="font-body-md text-body-md text-on-surface-variant">Premier League</span></label>
+<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="league-check w-4 h-4 accent-white" value="la-liga"/><span class="font-body-md text-body-md text-on-surface-variant">La Liga</span></label>
+<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="league-check w-4 h-4 accent-white" value="serie-a"/><span class="font-body-md text-body-md text-on-surface-variant">Serie A</span></label>
+<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="league-check w-4 h-4 accent-white" value="bundesliga"/><span class="font-body-md text-body-md text-on-surface-variant">Bundesliga</span></label>
+<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="league-check w-4 h-4 accent-white" value="ligue-1"/><span class="font-body-md text-body-md text-on-surface-variant">Ligue 1</span></label>
+<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="league-check w-4 h-4 accent-white" value="other-european"/><span class="font-body-md text-body-md text-on-surface-variant">Other European Leagues</span></label>
+<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="league-check w-4 h-4 accent-white" value="international"/><span class="font-body-md text-body-md text-on-surface-variant">International / National Teams</span></label>
+<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="league-check w-4 h-4 accent-white" value="other-clubs"/><span class="font-body-md text-body-md text-on-surface-variant">Other Clubs</span></label>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Team</label>
+<div class="flex flex-col gap-3 max-h-40 overflow-y-auto no-scrollbar" id="team-filters-mobile"></div>
+</div>
+<div class="flex flex-col gap-4">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Size</label>
+<div class="grid grid-cols-4 gap-2" id="size-filters-mobile">
+<button data-size="S" class="size-btn py-2 border border-stadium-grey font-label-sm text-label-sm text-on-surface-variant">S</button>
+<button data-size="M" class="size-btn py-2 border border-stadium-grey font-label-sm text-label-sm text-on-surface-variant">M</button>
+<button data-size="L" class="size-btn py-2 border border-stadium-grey font-label-sm text-label-sm text-on-surface-variant">L</button>
+<button data-size="XL" class="size-btn py-2 border border-stadium-grey font-label-sm text-label-sm text-on-surface-variant">XL</button>
+</div>
+</div>
+</div>
+
+<div id="shop-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3"></div>
+
+<div class="w-full py-16 flex justify-center items-center border-t border-stadium-grey mt-auto">
+<button id="load-more" class="px-8 py-4 border border-stadium-grey font-label-sm text-label-sm text-primary uppercase tracking-widest hover:border-primary transition-colors hover:bg-surface-container-low">
+Load More Archives
+</button>
+</div>
+</div>
+</div>
+</div>
+
+</main>
+<div id="site-footer"></div>
+
+<script src="assets/js/products.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(location.search);
+  const state = {
+    league: new Set(),
+    team: new Set(),
+    era: new Set(),
+    sizes: new Set(),
+    sort: "newest",
+    page: 1,
+    perPage: 9
+  };
+  const initialCategory = params.get("category");
+  if (initialCategory === "vintage" || initialCategory === "modern") state.era.add(initialCategory);
+  const initialLeague = params.get("league");
+  if (initialLeague && LEAGUES.some(l => l.slug === initialLeague)) state.league.add(initialLeague);
+  const initialTeam = params.get("team");
+  if (initialTeam) state.team.add(initialTeam);
+
+  const titleEl = document.getElementById("shop-title");
+  const countEl = document.getElementById("shop-count");
+  const gridEl = document.getElementById("shop-grid");
+  const chipsEl = document.getElementById("filter-chips");
+  const loadMoreBtn = document.getElementById("load-more");
+  const sortSelect = document.getElementById("sort-select");
+
+  function currentTeamOptions() {
+    return getTeamsForLeagues(Array.from(state.league));
+  }
+
+  function renderTeamFilters() {
+    const teams = currentTeamOptions();
+    // Drop any selected team that's no longer in scope (e.g. its league got unchecked).
+    state.team.forEach(t => {
+      if (!teams.includes(t)) state.team.delete(t);
+    });
+
+    const optionHtml = compact =>
+      teams.length
+        ? teams
+            .map(
+              t => `<label class="flex items-center ${compact ? "gap-2" : "gap-4"} cursor-pointer group">
+                <input type="checkbox" class="team-check w-4 h-4 accent-white" value="${t}" ${state.team.has(t) ? "checked" : ""}/>
+                <span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors ${compact ? "text-sm" : ""}">${t}</span>
+              </label>`
+            )
+            .join("")
+        : `<p class="font-label-sm text-label-sm text-outline uppercase tracking-widest">No teams in stock yet</p>`;
+
+    document.getElementById("team-filters").innerHTML = optionHtml(false);
+    document.getElementById("team-filters-mobile").innerHTML = optionHtml(true);
+  }
+
+  function syncCheckboxes() {
+    document.querySelectorAll(".league-check").forEach(cb => (cb.checked = state.league.has(cb.value)));
+    document.querySelectorAll(".size-btn").forEach(btn => {
+      const on = state.sizes.has(btn.dataset.size);
+      btn.classList.toggle("border-primary", on);
+      btn.classList.toggle("bg-primary", on);
+      btn.classList.toggle("text-pitch-black", on);
+      btn.classList.toggle("text-on-surface-variant", !on);
+    });
+  }
+
+  function getFiltered() {
+    let list = PRODUCTS.filter(p => {
+      if (state.league.size && !state.league.has(p.league)) return false;
+      if (state.team.size && !state.team.has(p.team)) return false;
+      if (state.era.size && !state.era.has(p.category)) return false;
+      if (state.sizes.size && !p.sizes.some(s => state.sizes.has(s))) return false;
+      return true;
+    });
+    switch (state.sort) {
+      case "price_asc": list.sort((a, b) => a.price - b.price); break;
+      case "price_desc": list.sort((a, b) => b.price - a.price); break;
+      case "year": list.sort((a, b) => a.year - b.year); break;
+      default: list.sort((a, b) => b.year - a.year);
+    }
+    return list;
+  }
+
+  function renderChips() {
+    const chips = [];
+    state.league.forEach(l => chips.push({ label: getLeagueLabel(l), clear: () => state.league.delete(l) }));
+    state.team.forEach(t => chips.push({ label: t, clear: () => state.team.delete(t) }));
+    state.era.forEach(e =>
+      chips.push({ label: e === "vintage" ? "Vintage (Pre-2000)" : "Modern Classics", clear: () => state.era.delete(e) })
+    );
+    state.sizes.forEach(s => chips.push({ label: "Size: " + s, clear: () => state.sizes.delete(s) }));
+    chipsEl.innerHTML = chips
+      .map(
+        (c, i) => `<div class="px-3 py-1 border border-stadium-grey font-label-sm text-label-sm text-primary flex items-center gap-2 uppercase tracking-widest">
+        ${c.label} <span data-i="${i}" class="chip-clear material-symbols-outlined text-[14px] cursor-pointer hover:text-kit-accent-red">close</span>
+      </div>`
+      )
+      .join(chips.length ? `` : "") + (chips.length ? `<button id="chip-clear-all" class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary uppercase tracking-widest ml-4 transition-colors">Clear All</button>` : "");
+    chipsEl.querySelectorAll(".chip-clear").forEach((el, i) =>
+      el.addEventListener("click", () => {
+        chips[i].clear();
+        render();
+      })
+    );
+    document.getElementById("chip-clear-all")?.addEventListener("click", () => {
+      state.league.clear();
+      state.team.clear();
+      state.era.clear();
+      state.sizes.clear();
+      render();
+    });
+  }
+
+  function computeTitle() {
+    if (state.team.size === 1) return Array.from(state.team)[0];
+    if (state.league.size === 1) return getLeagueLabel(Array.from(state.league)[0]);
+    if (state.era.size === 1) return state.era.has("vintage") ? "Vintage Archive" : "Modern Classics";
+    return "The Collection";
+  }
+
+  function render() {
+    renderTeamFilters();
+    syncCheckboxes();
+    renderChips();
+    const filtered = getFiltered();
+    countEl.textContent = filtered.length;
+    titleEl.textContent = computeTitle();
+    const visible = filtered.slice(0, state.page * state.perPage);
+    gridEl.innerHTML = visible.length
+      ? visible.map(productCardArtifact).join("")
+      : `<div class="col-span-full py-24 text-center font-body-lg text-body-lg text-on-surface-variant">No artifacts match those filters yet — check back as the archive grows.</div>`;
+    wireQuickAdd(gridEl);
+    loadMoreBtn.style.display = visible.length < filtered.length ? "" : "none";
+  }
+
+  document.querySelectorAll(".league-check").forEach(cb =>
+    cb.addEventListener("change", () => {
+      cb.checked ? state.league.add(cb.value) : state.league.delete(cb.value);
+      state.page = 1;
+      render();
+    })
+  );
+  document.addEventListener("change", e => {
+    if (!e.target.classList.contains("team-check")) return;
+    e.target.checked ? state.team.add(e.target.value) : state.team.delete(e.target.value);
+    state.page = 1;
+    render();
+  });
+  document.querySelectorAll(".size-btn").forEach(btn =>
+    btn.addEventListener("click", () => {
+      state.sizes.has(btn.dataset.size) ? state.sizes.delete(btn.dataset.size) : state.sizes.add(btn.dataset.size);
+      state.page = 1;
+      render();
+    })
+  );
+  sortSelect.addEventListener("change", () => {
+    state.sort = sortSelect.value;
+    render();
+  });
+  loadMoreBtn.addEventListener("click", () => {
+    state.page++;
+    render();
+  });
+  document.getElementById("mobile-filter-toggle").addEventListener("click", () => {
+    document.getElementById("mobile-filters").classList.toggle("hidden");
+    document.getElementById("mobile-filters").classList.toggle("flex");
+  });
+
+  render();
+});
+</script>
+</body>
+</html>

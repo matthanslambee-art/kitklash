@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Request A Jersey — KITKLASH</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/png" href="assets/img/logo.png"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;overflow-x:hidden;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}@media (max-width:640px){.text-display-xl{font-size:42px!important;line-height:46px!important;}.text-headline-lg{font-size:32px!important;line-height:38px!important;}}</style>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="assets/js/tailwind-config.js"></script>
+</head>
+<body class="bg-pitch-black font-body-md text-body-md text-on-surface">
+<div id="site-header"></div>
+<main class="w-full pt-20 bg-pitch-black">
+<div class="flex flex-col w-full">
+
+<section class="w-full pt-24 lg:pt-32 pb-16 border-b border-stadium-grey">
+<div class="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop flex flex-col gap-6">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Can't Find It?</span>
+<h1 class="font-display-xl text-display-xl text-primary uppercase tracking-tighter max-w-3xl">Request A Jersey</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Tell us the shirt you're after and we'll try to source it for our next monthly supplier run. No promises, but if it exists, we'll go looking.</p>
+</div>
+</section>
+
+<section class="w-full py-16 lg:py-24">
+<div class="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop">
+<div class="max-w-2xl">
+
+<form id="request-form" class="flex flex-col gap-10">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
+    <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">First Name *</label>
+      <input required id="rf-firstName" type="text" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
+    </div>
+    <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Surname *</label>
+      <input required id="rf-surname" type="text" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
+    </div>
+    <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Email *</label>
+      <input required id="rf-email" type="email" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
+    </div>
+    <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">WhatsApp / Contact Number</label>
+      <input id="rf-contact" type="text" placeholder="Optional" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
+    </div>
+  </div>
+
+  <hr class="border-t border-stadium-grey"/>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-10">
+    <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors md:col-span-2">
+      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Team You're Looking For *</label>
+      <input required id="rf-team" type="text" placeholder="e.g. FC Barcelona" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
+    </div>
+    <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Year</label>
+      <input id="rf-year" type="text" placeholder="e.g. 1999" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
+    </div>
+    <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Size</label>
+      <select id="rf-size" class="bg-pitch-black w-full pb-3 text-primary outline-none cursor-pointer">
+        <option value="">Select size</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+        <option value="XXL">XXL</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+    <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Special Notes</label>
+    <p class="font-label-sm text-label-sm text-outline mb-3 normal-case tracking-normal">Custom name+number or patches</p>
+    <textarea id="rf-notes" rows="3" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline resize-none"></textarea>
+  </div>
+
+  <div class="flex flex-col gap-4">
+    <button type="submit" class="bg-primary text-pitch-black font-label-sm text-label-sm px-8 py-4 uppercase tracking-widest hover:bg-surface-tint transition-colors border border-primary w-full sm:w-fit">Submit Request</button>
+    <p id="request-error" class="font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest hidden">Please fill in all required fields.</p>
+  </div>
+</form>
+
+<div id="request-success" class="hidden flex-col gap-4 py-8">
+  <span class="material-symbols-outlined text-primary text-5xl">check_circle</span>
+  <h2 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tighter">Almost There</h2>
+  <p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">We've opened WhatsApp with your request ready to go — just hit send there and we'll get back to you if we can track it down for our next supplier run.</p>
+  <a href="shop.html" class="font-label-sm text-label-sm text-primary uppercase tracking-widest hover:text-surface-tint border-b border-primary w-fit pb-1 mt-2">Back To The Shop</a>
+</div>
+
+</div>
+</div>
+</section>
+
+</div>
+</main>
+<div id="site-footer"></div>
+
+<script src="assets/js/products.js"></script>
+<script src="assets/js/requests.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("request-form");
+  const errorEl = document.getElementById("request-error");
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const record = {
+      firstName: document.getElementById("rf-firstName").value.trim(),
+      surname: document.getElementById("rf-surname").value.trim(),
+      email: document.getElementById("rf-email").value.trim(),
+      contact: document.getElementById("rf-contact").value.trim(),
+      team: document.getElementById("rf-team").value.trim(),
+      year: document.getElementById("rf-year").value.trim(),
+      size: document.getElementById("rf-size").value,
+      notes: document.getElementById("rf-notes").value.trim()
+    };
+
+    if (!record.firstName || !record.surname || !record.email || !record.team) {
+      errorEl.classList.remove("hidden");
+      return;
+    }
+    errorEl.classList.add("hidden");
+
+    const saved = saveNewRequest(record);
+    window.open(buildRequestWhatsAppLink(saved), "_blank");
+
+    form.classList.add("hidden");
+    const success = document.getElementById("request-success");
+    success.classList.remove("hidden");
+    success.classList.add("flex");
+  });
+});
+</script>
+</body>
+</html>

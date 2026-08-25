@@ -1,0 +1,95 @@
+<header class="fixed top-0 w-full z-50 bg-pitch-black/80 backdrop-blur-xl border-b border-stadium-grey">
+  <div class="h-20 max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-4">
+      <img alt="KITKLASH Logo" class="h-8 w-auto object-contain" src="assets/img/logo.png"/>
+      <span class="font-headline-md text-headline-md text-primary tracking-tighter uppercase">KITKLASH</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-12" id="primary-nav">
+      <a class="nav-link font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors tracking-widest uppercase" data-path="shop" href="shop.html">Shop</a>
+      <a class="nav-link font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors tracking-widest uppercase" data-path="on-hand" href="on-hand.html">On Hand</a>
+      <a class="nav-link font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors tracking-widest uppercase" data-path="vintage" href="shop.html?category=vintage">Vintage</a>
+      <a class="nav-link font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors tracking-widest uppercase" data-path="modern" href="shop.html?category=modern">Modern</a>
+      <a class="nav-link font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors tracking-widest uppercase" data-path="about" href="about.html">About</a>
+    </nav>
+    <div class="flex items-center gap-6">
+      <button id="search-toggle" class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">search</span></button>
+      <button id="cart-toggle" class="relative text-on-surface-variant hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">shopping_bag</span>
+        <span id="cart-count" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-kit-accent-red text-[10px] font-bold text-primary">0</span>
+      </button>
+      <a href="admin.html" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-2 hover:bg-surface-tint transition-colors" title="Admin Panel">
+        <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+      </a>
+      <button id="mobile-menu-toggle" class="md:hidden text-on-surface"><span class="material-symbols-outlined">menu</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile nav overlay -->
+<div id="mobile-menu" class="fixed inset-0 z-[60] bg-pitch-black hidden flex-col">
+  <div class="h-20 px-margin-mobile flex items-center justify-between border-b border-stadium-grey">
+    <span class="font-headline-md text-headline-md text-primary tracking-tighter uppercase">KITKLASH</span>
+    <button id="mobile-menu-close" class="text-on-surface"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <nav class="flex flex-col p-margin-mobile gap-8 mt-8">
+    <a class="nav-link font-headline-md text-headline-md text-on-surface-variant uppercase" data-path="shop" href="shop.html">Shop</a>
+    <a class="nav-link font-headline-md text-headline-md text-on-surface-variant uppercase" data-path="on-hand" href="on-hand.html">On Hand</a>
+    <a class="nav-link font-headline-md text-headline-md text-on-surface-variant uppercase" data-path="vintage" href="shop.html?category=vintage">Vintage</a>
+    <a class="nav-link font-headline-md text-headline-md text-on-surface-variant uppercase" data-path="modern" href="shop.html?category=modern">Modern</a>
+    <a class="nav-link font-headline-md text-headline-md text-on-surface-variant uppercase" data-path="about" href="about.html">About</a>
+    <a class="nav-link font-headline-md text-headline-md text-on-surface-variant uppercase text-primary" data-path="admin" href="admin.html">Admin Panel</a>
+  </nav>
+</div>
+
+<!-- Search overlay -->
+<div id="search-overlay" class="fixed inset-0 z-[70] bg-pitch-black/95 backdrop-blur-sm hidden flex-col">
+  <div class="max-w-container-max w-full mx-auto px-margin-mobile lg:px-margin-desktop pt-24 lg:pt-40 flex flex-col gap-8">
+    <div class="flex items-center justify-between gap-4">
+      <input id="search-input" type="text" placeholder="SEARCH THE ARCHIVE…" class="w-full bg-transparent border-b border-stadium-grey focus:border-primary outline-none font-display-xl text-display-xl text-3xl lg:text-5xl text-primary uppercase py-4 placeholder:text-surface-variant"/>
+      <button id="search-close" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-4xl">close</span></button>
+    </div>
+    <div id="search-results" class="flex flex-col gap-4 max-h-[60vh] overflow-y-auto pb-8"></div>
+  </div>
+</div>
+
+<!-- Size guide modal -->
+<div id="size-guide-overlay" class="fixed inset-0 z-[90] bg-pitch-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div class="bg-charcoal-depth border border-stadium-grey w-full max-w-lg max-h-[85vh] overflow-y-auto flex flex-col">
+    <div class="px-8 py-6 border-b border-stadium-grey flex items-center justify-between shrink-0">
+      <span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Size Guide</span>
+      <button id="size-guide-close" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="px-8 py-8 flex flex-col gap-8">
+      <div class="flex flex-col gap-2">
+        <h3 class="font-label-sm text-label-sm text-primary uppercase tracking-widest">General Fit</h3>
+        <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">Retro shirts and modern replicas tend to run a little small — best to order one size up from your normal size.</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <h3 class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Player Version</h3>
+        <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">Tight fit, due to the player performance technology used in the material. We'd recommend ordering a size up for a slim fit, or two sizes up for larger individuals. Not recommended for plus-sized individuals.</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <h3 class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Fan Version</h3>
+        <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">This is a slim fit shirt — go one size up if you want a more loose fit.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cart drawer -->
+<div id="cart-overlay" class="fixed inset-0 z-[70] bg-pitch-black/60 hidden"></div>
+<aside id="cart-drawer" class="fixed top-0 right-0 z-[80] h-full w-full sm:w-[420px] bg-charcoal-depth border-l border-stadium-grey translate-x-full transition-transform duration-300 flex flex-col">
+  <div class="h-20 px-margin-mobile flex items-center justify-between border-b border-stadium-grey shrink-0">
+    <span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Your Bag</span>
+    <button id="cart-close" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div id="cart-items" class="flex-1 overflow-y-auto px-margin-mobile py-8 flex flex-col gap-8"></div>
+  <div class="border-t border-stadium-grey px-margin-mobile py-8 flex flex-col gap-4 shrink-0">
+    <div class="flex justify-between font-label-sm text-label-sm text-primary uppercase tracking-widest">
+      <span>Subtotal</span>
+      <span id="cart-subtotal">R0</span>
+    </div>
+    <button id="cart-checkout" class="w-full py-4 bg-primary text-pitch-black font-label-sm text-label-sm uppercase tracking-widest hover:bg-surface-tint transition-colors">Checkout</button>
+    <p class="font-label-sm text-label-sm text-on-surface-variant text-[10px] uppercase tracking-widest text-center">Demo store — no payment is processed</p>
+  </div>
+</aside>

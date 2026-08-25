@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>On Hand — KITKLASH</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/png" href="assets/img/logo.png"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;overflow-x:hidden;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}@media (max-width:640px){.text-display-xl{font-size:42px!important;line-height:46px!important;}.text-headline-lg{font-size:32px!important;line-height:38px!important;}}</style>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="assets/js/tailwind-config.js"></script>
+</head>
+<body class="bg-pitch-black font-body-md text-body-md text-on-surface">
+<div id="site-header"></div>
+<main class="w-full pt-20 bg-pitch-black">
+<div class="flex flex-col w-full">
+
+<section class="w-full pt-16 md:pt-32 pb-16 md:pb-24 border-b border-stadium-grey">
+<div class="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+<div class="max-w-2xl">
+<h1 class="font-display-xl text-display-xl text-primary tracking-tighter uppercase mb-6 drop-shadow-md">On Hand</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Available jerseys currently in our collection. Ready for immediate dispatch to the terrace.</p>
+</div>
+<div class="flex items-center gap-4 font-label-sm text-label-sm tracking-widest text-on-surface-variant uppercase">
+<span>Sort By:</span>
+<select id="sort-select" class="bg-transparent border-b border-stadium-grey focus:border-primary focus:outline-none py-1 text-primary cursor-pointer transition-colors">
+<option value="new">New Arrivals</option>
+<option value="price-asc">Price: Low to High</option>
+<option value="price-desc">Price: High to Low</option>
+<option value="era">Era</option>
+</select>
+</div>
+</div>
+</div>
+</section>
+
+<section class="w-full py-16 md:py-32 relative">
+<div class="absolute inset-0 bg-gradient-to-b from-charcoal-depth/50 to-transparent pointer-events-none"></div>
+<div class="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop relative z-10">
+<div id="on-hand-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-gutter gap-y-16"></div>
+<div class="w-full flex justify-center mt-24">
+<button id="load-more" class="border border-stadium-grey bg-transparent text-primary font-label-sm text-label-sm uppercase tracking-widest px-12 py-4 hover:bg-surface-container-high transition-colors shadow-sm">Load More Archives</button>
+</div>
+</div>
+</section>
+
+</div>
+</main>
+<div id="site-footer"></div>
+
+<script src="assets/js/products.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const grid = document.getElementById("on-hand-grid");
+  const loadMoreBtn = document.getElementById("load-more");
+  const sortSelect = document.getElementById("sort-select");
+  let page = 1;
+  const perPage = 8;
+
+  function getSorted() {
+    const list = PRODUCTS.filter(p => p.onHand).slice();
+    switch (sortSelect.value) {
+      case "price-asc": list.sort((a, b) => a.price - b.price); break;
+      case "price-desc": list.sort((a, b) => b.price - a.price); break;
+      case "era": list.sort((a, b) => a.year - b.year); break;
+      default: list.sort((a, b) => b.year - a.year);
+    }
+    return list;
+  }
+
+  function render() {
+    const all = getSorted();
+    const visible = all.slice(0, page * perPage);
+    grid.innerHTML = visible.map(productCardCompact).join("");
+    loadMoreBtn.style.display = visible.length < all.length ? "" : "none";
+  }
+
+  sortSelect.addEventListener("change", () => { page = 1; render(); });
+  loadMoreBtn.addEventListener("click", () => { page++; render(); });
+
+  render();
+});
+</script>
+</body>
+</html>
