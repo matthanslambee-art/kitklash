@@ -18,9 +18,24 @@
 <script src="assets/js/tailwind-config.js"></script>
 </head>
 <body class="bg-pitch-black font-body-md text-body-md text-on-surface min-h-screen flex flex-col">
+
+<div id="admin-gate" class="fixed inset-0 z-[100] bg-pitch-black flex items-center justify-center p-6">
+  <form id="admin-gate-form" class="w-full max-w-sm flex flex-col gap-6">
+    <div class="flex flex-col gap-1 text-center">
+      <span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">KITKLASH</span>
+      <h1 class="font-display-xl text-display-xl text-primary uppercase text-2xl">Admin Access</h1>
+    </div>
+    <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+      <input id="admin-gate-password" type="password" placeholder="Password" autocomplete="off" class="bg-transparent w-full pb-3 text-primary outline-none text-center"/>
+    </div>
+    <button type="submit" class="bg-primary text-pitch-black font-label-sm text-label-sm px-8 py-4 uppercase tracking-widest hover:bg-surface-tint transition-colors">Enter</button>
+    <p id="admin-gate-error" class="font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest text-center hidden">Incorrect password.</p>
+  </form>
+</div>
+
 <div id="site-header"></div>
 
-<main class="flex-1 w-full pt-28 pb-20 bg-pitch-black">
+<main id="admin-main" class="hidden flex-1 w-full pt-28 pb-20 bg-pitch-black">
   <div class="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop flex flex-col gap-8">
     
     <!-- Top Title & Description -->
@@ -438,6 +453,31 @@
 <script src="assets/js/orders.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
+const ADMIN_PASSWORD = "kitklash-vault-27";
+const ADMIN_SESSION_KEY = "kitklash_admin_authed";
+
+function unlockAdmin() {
+  document.getElementById("admin-gate").classList.add("hidden");
+  document.getElementById("admin-main").classList.remove("hidden");
+}
+
+if (sessionStorage.getItem(ADMIN_SESSION_KEY) === "true") {
+  unlockAdmin();
+}
+
+document.getElementById("admin-gate-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const input = document.getElementById("admin-gate-password");
+  if (input.value === ADMIN_PASSWORD) {
+    sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
+    unlockAdmin();
+  } else {
+    document.getElementById("admin-gate-error").classList.remove("hidden");
+    input.value = "";
+    input.focus();
+  }
+});
+
 document.addEventListener("DOMContentLoaded", async () => {
   await loadLayout();
   renderAdminTable();
