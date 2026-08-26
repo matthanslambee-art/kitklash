@@ -84,7 +84,7 @@ const DEFAULT_PRODUCTS = [
     team: "France", year: 2006, player: "Zidane #10",
     league: "international", country: "France", kitType: "Away",
     versions: ["fan", "player"],
-    category: "modern", condition: "Mint Condition", price: 350,
+    category: "modern", condition: "Mint Condition", price: 750,
     badge: "Rare", onHand: true, latestDrop: false, soldOut: false,
     sizes: ["L"],
     img: "assets/img/zidane-2006-back.png",
