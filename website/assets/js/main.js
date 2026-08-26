@@ -262,7 +262,7 @@ function productCardCompact(p) {
         <h3 class="font-body-md text-body-md text-primary truncate">${p.name}</h3>
         <span class="font-price-display text-price-display text-primary whitespace-nowrap">${formatPrice(p.price)}</span>
       </div>
-      <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">${p.player} • ${p.condition}</p>
+      <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">${[p.player, p.condition].filter(Boolean).join(" • ")}</p>
     </div>
   </a>`;
 }

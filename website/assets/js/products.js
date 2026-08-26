@@ -100,7 +100,7 @@ const DEFAULT_PRODUCTS = [
   {
     slug: "ac-milan-2023-pleasures",
     name: "AC Milan 2023/24 x PLEASURES",
-    team: "AC Milan", year: 2023, player: null,
+    team: "AC Milan", year: 2023, player: "",
     league: "serie-a", country: "Italy", kitType: "Special Edition",
     category: "modern", condition: "Excellent", price: 650,
     badge: null, onHand: true, latestDrop: false, soldOut: false,
@@ -113,7 +113,7 @@ const DEFAULT_PRODUCTS = [
   {
     slug: "argentina-2026-away",
     name: "Argentina 2026 Away",
-    team: "Argentina", year: 2026, player: null,
+    team: "Argentina", year: 2026, player: "",
     league: "international", country: "Argentina", kitType: "Away",
     category: "modern", condition: "Excellent", price: 650,
     badge: null, onHand: true, latestDrop: true, soldOut: false,
@@ -152,7 +152,7 @@ const DEFAULT_PRODUCTS = [
   {
     slug: "man-city-2026-away",
     name: "Manchester City 2026/27 Away",
-    team: "Manchester City", year: 2026, player: null,
+    team: "Manchester City", year: 2026, player: "",
     league: "premier-league", country: "England", kitType: "Away",
     category: "modern", condition: "Excellent", price: 650,
     badge: null, onHand: true, latestDrop: true, soldOut: false,
