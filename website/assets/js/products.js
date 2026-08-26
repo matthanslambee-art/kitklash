@@ -132,7 +132,7 @@ const DEFAULT_PRODUCTS = [
     badge: "Rare", onHand: true, latestDrop: false, soldOut: false,
     sizes: ["L"],
     img: "assets/img/barcelona-2008-home-1.jpg",
-    gallery: ["assets/img/barcelona-2008-home-1.jpg", "assets/img/barcelona-2008-home-2.jpg", "assets/img/barcelona-2008-home-3.jpg", "assets/img/barcelona-2008-home-4.jpg", "assets/img/barcelona-2008-home-5.jpg", "assets/img/barcelona-2008-home-6.jpg"],
+    gallery: ["assets/img/barcelona-2008-home-1.jpg", "assets/img/barcelona-2008-home-2.jpg", "assets/img/barcelona-2008-home-3.jpg", "assets/img/barcelona-2008-home-4.jpg", "assets/img/barcelona-2008-home-5.jpg"],
     story: "The historic treble-winning season shirt, worn by a 21-year-old Messi during Barcelona's dominant 2008/09 Champions League, La Liga, and Copa del Rey sweep.",
     brand: "Nike", authenticity: "Verified Original"
   },
@@ -164,15 +164,15 @@ const DEFAULT_PRODUCTS = [
   },
   {
     slug: "man-utd-2007-home",
-    name: "Manchester United 2007/08 Home",
+    name: "Manchester United 2007/08 'Final Moscow' Home",
     team: "Manchester United", year: 2007, player: "Ronaldo #7",
     league: "premier-league", country: "England", kitType: "Home",
     category: "modern", condition: "Excellent", price: 850,
     badge: "Grail", onHand: true, latestDrop: false, soldOut: false,
     sizes: ["L"],
     img: "assets/img/man-utd-2007-home-1.jpg",
-    gallery: ["assets/img/man-utd-2007-home-1.jpg", "assets/img/man-utd-2007-home-2.jpg", "assets/img/man-utd-2007-home-3.jpg", "assets/img/man-utd-2007-home-4.jpg", "assets/img/man-utd-2007-home-5.jpg", "assets/img/man-utd-2007-home-6.jpg"],
-    story: "The Premier League and Champions League-winning season. Cristiano Ronaldo's 2007/08 masterpiece, scoring 42 goals in all competitions and claiming his first Ballon d'Or.",
+    gallery: ["assets/img/man-utd-2007-home-1.jpg", "assets/img/man-utd-2007-home-2.jpg", "assets/img/man-utd-2007-home-3.jpg", "assets/img/man-utd-2007-home-4.jpg", "assets/img/man-utd-2007-home-5.jpg"],
+    story: "The commemorative long-sleeve edition marking United's 2008 Champions League Final win over Chelsea in Moscow, embroidered with 'Final Moscow 2008 — 21st May, Luzhniki Stadium'. The crowning shirt of Cristiano Ronaldo's 2007/08 season, in which he scored 42 goals and claimed his first Ballon d'Or.",
     brand: "Nike", authenticity: "Verified Original"
   }
 ];
