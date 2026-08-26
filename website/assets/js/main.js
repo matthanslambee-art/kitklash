@@ -282,7 +282,7 @@ function productCardArtifact(p) {
     </a>
     <div class="p-6 border-t border-stadium-grey bg-pitch-black flex flex-col gap-2 z-10 relative ${p.soldOut ? "opacity-50" : ""}">
       <div class="flex justify-between items-start">
-        <a href="product.html?slug=${p.slug}"><h3 class="font-headline-md text-headline-md text-primary uppercase leading-tight line-clamp-2 w-3/4 hover:text-surface-tint transition-colors">${p.team}</h3></a>
+        <a href="product.html?slug=${p.slug}"><h3 class="font-headline-md text-headline-md text-primary uppercase leading-tight line-clamp-2 break-words w-3/4 hover:text-surface-tint transition-colors">${p.team}</h3></a>
         <span class="font-price-display text-price-display text-primary">${formatPrice(p.price)}</span>
       </div>
       <div class="flex justify-between items-end mt-2">
