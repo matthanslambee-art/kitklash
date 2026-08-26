@@ -96,6 +96,84 @@ const DEFAULT_PRODUCTS = [
     ],
     story: "The white away kit worn by Zinedine Zidane during the 2006 World Cup campaign, culminating in the infamous final. This pristine piece of football history represents the twilight of a maestro's career. Features the distinct typography and chest crest synonymous with that era's French national team design language.",
     brand: "Adidas", authenticity: "Verified Original"
+  },
+  {
+    slug: "ac-milan-2023-pleasures",
+    name: "AC Milan 2023/24 x PLEASURES",
+    team: "AC Milan", year: 2023, player: null,
+    league: "serie-a", country: "Italy", kitType: "Special Edition",
+    category: "modern", condition: "Excellent", price: 650,
+    badge: null, onHand: true, latestDrop: false, soldOut: false,
+    sizes: ["M"],
+    img: "assets/img/ac-milan-2023-pleasures-1.jpg",
+    gallery: ["assets/img/ac-milan-2023-pleasures-1.jpg", "assets/img/ac-milan-2023-pleasures-2.jpg", "assets/img/ac-milan-2023-pleasures-3.jpg"],
+    story: "A limited streetwear collaboration kit, blending Milan's iconic red-and-black with PLEASURES' distinct graphic identity — a modern archive piece for collectors beyond the terrace.",
+    brand: "PUMA", authenticity: "Verified Original"
+  },
+  {
+    slug: "argentina-2026-away",
+    name: "Argentina 2026 Away",
+    team: "Argentina", year: 2026, player: null,
+    league: "international", country: "Argentina", kitType: "Away",
+    category: "modern", condition: "Excellent", price: 650,
+    badge: null, onHand: true, latestDrop: true, soldOut: false,
+    sizes: ["L"],
+    img: "assets/img/argentina-2026-away-1.jpg",
+    gallery: ["assets/img/argentina-2026-away-1.jpg", "assets/img/argentina-2026-away-2.jpg"],
+    story: "The current Argentina away shirt, carrying the World Champions crest into a new era.",
+    brand: "Adidas", authenticity: "Verified Original"
+  },
+  {
+    slug: "barcelona-2008-home",
+    name: "Barcelona 2008/09 Home",
+    team: "Barcelona", year: 2008, player: "Messi #10",
+    league: "la-liga", country: "Spain", kitType: "Home",
+    category: "modern", condition: "Excellent", price: 750,
+    badge: "Rare", onHand: true, latestDrop: false, soldOut: false,
+    sizes: ["L"],
+    img: "assets/img/barcelona-2008-home-1.jpg",
+    gallery: ["assets/img/barcelona-2008-home-1.jpg", "assets/img/barcelona-2008-home-2.jpg", "assets/img/barcelona-2008-home-3.jpg", "assets/img/barcelona-2008-home-4.jpg", "assets/img/barcelona-2008-home-5.jpg", "assets/img/barcelona-2008-home-6.jpg"],
+    story: "The historic treble-winning season shirt, worn by a 21-year-old Messi during Barcelona's dominant 2008/09 Champions League, La Liga, and Copa del Rey sweep.",
+    brand: "Nike", authenticity: "Verified Original"
+  },
+  {
+    slug: "brazil-2002-home",
+    name: "Brazil 2002 Home",
+    team: "Brazil", year: 2002, player: "Ronaldo #9",
+    league: "international", country: "Brazil", kitType: "Home",
+    category: "modern", condition: "Excellent", price: 750,
+    badge: "Rare", onHand: true, latestDrop: false, soldOut: false,
+    sizes: ["L"],
+    img: "assets/img/brazil-2002-home-1.jpg",
+    gallery: ["assets/img/brazil-2002-home-1.jpg", "assets/img/brazil-2002-home-2.jpg", "assets/img/brazil-2002-home-3.jpg"],
+    story: "The canary yellow of the Pentacampeões. Ronaldo, Rivaldo and Ronaldinho's front three wore this to a fifth World Cup star in Yokohama.",
+    brand: "Nike", authenticity: "Verified Original"
+  },
+  {
+    slug: "man-city-2026-away",
+    name: "Manchester City 2026/27 Away",
+    team: "Manchester City", year: 2026, player: null,
+    league: "premier-league", country: "England", kitType: "Away",
+    category: "modern", condition: "Excellent", price: 650,
+    badge: null, onHand: true, latestDrop: true, soldOut: false,
+    sizes: ["M"],
+    img: "assets/img/man-city-2026-away-1.jpg",
+    gallery: ["assets/img/man-city-2026-away-1.jpg"],
+    story: "Manchester City's current away kit, fresh into the archive for the 2026/27 season.",
+    brand: "PUMA", authenticity: "Verified Original"
+  },
+  {
+    slug: "man-utd-2007-home",
+    name: "Manchester United 2007/08 Home",
+    team: "Manchester United", year: 2007, player: "Ronaldo #7",
+    league: "premier-league", country: "England", kitType: "Home",
+    category: "modern", condition: "Excellent", price: 850,
+    badge: "Grail", onHand: true, latestDrop: false, soldOut: false,
+    sizes: ["L"],
+    img: "assets/img/man-utd-2007-home-1.jpg",
+    gallery: ["assets/img/man-utd-2007-home-1.jpg", "assets/img/man-utd-2007-home-2.jpg", "assets/img/man-utd-2007-home-3.jpg", "assets/img/man-utd-2007-home-4.jpg", "assets/img/man-utd-2007-home-5.jpg", "assets/img/man-utd-2007-home-6.jpg"],
+    story: "The Premier League and Champions League-winning season. Cristiano Ronaldo's 2007/08 masterpiece, scoring 42 goals in all competitions and claiming his first Ballon d'Or.",
+    brand: "Nike", authenticity: "Verified Original"
   }
 ];
 
