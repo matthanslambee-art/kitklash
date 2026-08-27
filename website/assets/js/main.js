@@ -309,7 +309,7 @@ function productCardArtifact(p) {
       <div class="flex justify-between items-end mt-2">
         <div class="flex flex-col">
           <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">${p.player}</span>
-          <span class="font-body-md text-body-md text-on-surface-variant mt-1 text-sm">Size ${p.sizes[0]} • ${p.condition}</span>
+          <span class="font-body-md text-body-md text-on-surface-variant mt-1 text-sm">Size ${p.sizes.length > 1 ? p.sizes[0] + "-" + p.sizes[p.sizes.length - 1] : p.sizes[0]} • ${p.condition}</span>
         </div>
         ${
           p.soldOut || isCustomizable(p)

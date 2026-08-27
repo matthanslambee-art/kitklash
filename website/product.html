@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const gallery = p.gallery && p.gallery.length ? p.gallery : [p.img];
   let selectedSize = p.sizes[0] || null;
   const versions = getVersions(p);
-  let selectedVersion = isCustomizable(p) ? "fan" : versions[0];
+  let selectedVersion = isCustomizable(p) ? "player" : versions[0];
   let selectedSleeve = "short";
   let patchEnabled = false;
   let customizationEnabled = false;
@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
             <span class="font-label-sm text-label-sm text-outline -mt-2">${p.condition}</span>
             <div class="grid grid-cols-3 gap-3" id="size-select">
-              ${["S", "M", "L", "XL", "XXL"]
+              ${["S", "M", "L", "XL", "2XL"]
                 .map(sz => {
                   const available = p.sizes.includes(sz);
                   const active = sz === selectedSize;
