@@ -166,13 +166,37 @@ function saveCart(cart) {
   updateCartUI();
 }
 
-function addToCart(slug, size, qty = 1, version = null) {
+function addToCart(slug, size, qty = 1, version = null, sleeve = null, patch = null, customization = null) {
   const cart = getCart();
-  const existing = cart.find(i => i.slug === slug && i.size === size && (i.version || null) === (version || null));
+  const key = i =>
+    JSON.stringify([i.slug, i.size, i.version || null, i.sleeve || null, i.patch || null, i.customization || null]);
+  const newItem = { slug, size, qty, version: version || null, sleeve: sleeve || null, patch: patch || null, customization: customization || null };
+  const existing = cart.find(i => key(i) === key(newItem));
   if (existing) existing.qty += qty;
-  else cart.push({ slug, size, qty, version: version || null });
+  else cart.push(newItem);
   saveCart(cart);
   openCart();
+}
+
+/* Per-unit price for a cart line: customizable products price by version+sleeve
+   rather than a flat `price`, plus flat add-on surcharges for patch/customization. */
+function cartItemUnitPrice(item) {
+  const p = getProductBySlug(item.slug);
+  if (!p) return 0;
+  let base = isCustomizable(p) ? getBasePrice(p, item.version, item.sleeve) : p.price;
+  if (item.patch) base += 50;
+  if (item.customization) base += 100;
+  return base;
+}
+
+function cartItemOptionsLabel(item) {
+  const parts = [`Size ${item.size}`];
+  if (item.version) parts.push(versionLabel(item.version));
+  if (item.sleeve) parts.push(sleeveLabel(item.sleeve));
+  if (item.patch) parts.push(`Patch: ${item.patch.description}`);
+  if (item.customization) parts.push(`Name/Number: ${item.customization.name} / ${item.customization.number}`);
+  parts.push(`Qty ${item.qty}`);
+  return parts.join(" · ");
 }
 
 function removeFromCart(index) {
@@ -186,10 +210,7 @@ function cartCount() {
 }
 
 function cartSubtotal() {
-  return getCart().reduce((sum, i) => {
-    const p = getProductBySlug(i.slug);
-    return sum + (p ? p.price * i.qty : 0);
-  }, 0);
+  return getCart().reduce((sum, i) => sum + cartItemUnitPrice(i) * i.qty, 0);
 }
 
 function updateCartUI() {
@@ -216,9 +237,9 @@ function updateCartUI() {
           <div class="flex-1 flex flex-col gap-1">
             <div class="flex justify-between gap-2">
               <span class="font-body-md text-body-md text-primary">${p.name}</span>
-              <span class="font-price-display text-price-display text-primary whitespace-nowrap">${formatPrice(p.price * item.qty)}</span>
+              <span class="font-price-display text-price-display text-primary whitespace-nowrap">${formatPrice(cartItemUnitPrice(item) * item.qty)}</span>
             </div>
-            <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Size ${item.size}${item.version ? " · " + versionLabel(item.version) : ""} · Qty ${item.qty}</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">${cartItemOptionsLabel(item)}</span>
             <button data-idx="${idx}" class="cart-remove font-label-sm text-label-sm text-on-surface-variant hover:text-kit-accent-red uppercase tracking-widest w-fit mt-1">Remove</button>
           </div>
         </div>`;
@@ -260,7 +281,7 @@ function productCardCompact(p) {
     <div class="flex flex-col gap-1">
       <div class="flex justify-between items-start gap-4">
         <h3 class="font-body-md text-body-md text-primary truncate">${p.name}</h3>
-        <span class="font-price-display text-price-display text-primary whitespace-nowrap">${formatPrice(p.price)}</span>
+        <span class="font-price-display text-price-display text-primary whitespace-nowrap">${isCustomizable(p) ? "From " + formatPrice(getDisplayFromPrice(p)) : formatPrice(p.price)}</span>
       </div>
       <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">${[p.player, p.condition].filter(Boolean).join(" • ")}</p>
     </div>
@@ -283,7 +304,7 @@ function productCardArtifact(p) {
     <div class="p-6 border-t border-stadium-grey bg-pitch-black flex flex-col gap-2 z-10 relative ${p.soldOut ? "opacity-50" : ""}">
       <div class="flex justify-between items-start">
         <a href="product.html?slug=${p.slug}"><h3 class="font-headline-md text-headline-md text-primary uppercase leading-tight line-clamp-2 break-words w-3/4 hover:text-surface-tint transition-colors">${p.team}</h3></a>
-        <span class="font-price-display text-price-display text-primary">${formatPrice(p.price)}</span>
+        <span class="font-price-display text-price-display text-primary">${isCustomizable(p) ? "From " + formatPrice(getDisplayFromPrice(p)) : formatPrice(p.price)}</span>
       </div>
       <div class="flex justify-between items-end mt-2">
         <div class="flex flex-col">
@@ -291,7 +312,7 @@ function productCardArtifact(p) {
           <span class="font-body-md text-body-md text-on-surface-variant mt-1 text-sm">Size ${p.sizes[0]} • ${p.condition}</span>
         </div>
         ${
-          p.soldOut
+          p.soldOut || isCustomizable(p)
             ? ""
             : `<button data-slug="${p.slug}" class="quick-add w-10 h-10 border border-stadium-grey flex items-center justify-center rounded-full hover:border-primary hover:bg-primary hover:text-pitch-black transition-all group/btn">
           <span class="material-symbols-outlined text-[18px] group-hover/btn:scale-110 transition-transform">add</span>

@@ -32,7 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const gallery = p.gallery && p.gallery.length ? p.gallery : [p.img];
   let selectedSize = p.sizes[0] || null;
   const versions = getVersions(p);
-  let selectedVersion = versions[0];
+  let selectedVersion = isCustomizable(p) ? "fan" : versions[0];
+  let selectedSleeve = "short";
+  let patchEnabled = false;
+  let customizationEnabled = false;
 
   const root = document.getElementById("product-root");
   root.innerHTML = `
@@ -62,10 +65,48 @@ document.addEventListener("DOMContentLoaded", () => {
               ${p.badge ? `<span class="px-2 py-1 border border-stadium-grey font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest text-[10px]">${p.badge}</span>` : ""}
             </div>
             <h1 class="font-display-xl text-display-xl text-primary leading-[0.9] mt-2 uppercase break-words">${p.name}</h1>
-            <p class="font-price-display text-price-display text-primary mt-4">${formatPrice(p.price)}</p>
+            <p id="product-price" class="font-price-display text-price-display text-primary mt-4">${isCustomizable(p) ? formatPrice(getBasePrice(p, selectedVersion, selectedSleeve)) : formatPrice(p.price)}</p>
           </div>
           <hr class="border-t border-stadium-grey w-full"/>
-          ${versions.length > 1 ? `
+          ${isCustomizable(p) ? `
+          <div class="flex flex-col gap-4">
+            <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Select Version</h3>
+            <div class="grid grid-cols-2 gap-3" id="version-select">
+              ${["fan", "player"]
+                .map(
+                  v => `<button data-version="${v}" class="version-opt py-4 border font-label-sm text-label-sm uppercase transition-colors ${v === selectedVersion ? "border-primary text-primary bg-charcoal-depth" : "border-stadium-grey text-on-surface-variant hover:border-primary hover:text-primary"}">${versionLabel(v)}</button>`
+                )
+                .join("")}
+            </div>
+          </div>
+          <div class="flex flex-col gap-4">
+            <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Select Sleeve</h3>
+            <div class="grid grid-cols-2 gap-3" id="sleeve-select">
+              ${["short", "long"]
+                .map(
+                  s => `<button data-sleeve="${s}" class="sleeve-opt py-4 border font-label-sm text-label-sm uppercase transition-colors ${s === selectedSleeve ? "border-primary text-primary bg-charcoal-depth" : "border-stadium-grey text-on-surface-variant hover:border-primary hover:text-primary"}">${sleeveLabel(s)}</button>`
+                )
+                .join("")}
+            </div>
+          </div>
+          <div class="flex flex-col gap-4">
+            <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Add-Ons</h3>
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" id="patch-toggle" class="w-5 h-5 accent-primary"/>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Add a Patch — +R50</span>
+            </label>
+            <input type="text" id="patch-description" placeholder="e.g. UCL" class="hidden bg-transparent border-b border-stadium-grey focus:border-primary outline-none py-2 text-primary"/>
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" id="customization-toggle" class="w-5 h-5 accent-primary"/>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Custom Name &amp; Number — +R100</span>
+            </label>
+            <div id="customization-fields" class="hidden grid grid-cols-2 gap-3">
+              <input type="text" id="customization-name" placeholder="Name" class="bg-transparent border-b border-stadium-grey focus:border-primary outline-none py-2 text-primary"/>
+              <input type="text" id="customization-number" placeholder="Number" class="bg-transparent border-b border-stadium-grey focus:border-primary outline-none py-2 text-primary"/>
+            </div>
+            <p id="addon-error" class="font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest hidden"></p>
+          </div>
+          ` : versions.length > 1 ? `
           <div class="flex flex-col gap-4">
             <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Select Version</h3>
             <div class="grid grid-cols-2 gap-3" id="version-select">
@@ -170,6 +211,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Version selection
+  function updatePriceDisplay() {
+    if (!isCustomizable(p)) return;
+    let total = getBasePrice(p, selectedVersion, selectedSleeve);
+    if (patchEnabled) total += 50;
+    if (customizationEnabled) total += 100;
+    document.getElementById("product-price").textContent = formatPrice(total);
+  }
+
   root.querySelectorAll(".version-opt").forEach(btn => {
     btn.addEventListener("click", () => {
       selectedVersion = btn.dataset.version;
@@ -179,7 +228,46 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       btn.classList.add("border-primary", "text-primary", "bg-charcoal-depth");
       btn.classList.remove("border-stadium-grey", "text-on-surface-variant");
+      updatePriceDisplay();
     });
+  });
+
+  // Sleeve selection
+  root.querySelectorAll(".sleeve-opt").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedSleeve = btn.dataset.sleeve;
+      root.querySelectorAll(".sleeve-opt").forEach(b => {
+        b.classList.remove("border-primary", "text-primary", "bg-charcoal-depth");
+        b.classList.add("border-stadium-grey", "text-on-surface-variant");
+      });
+      btn.classList.add("border-primary", "text-primary", "bg-charcoal-depth");
+      btn.classList.remove("border-stadium-grey", "text-on-surface-variant");
+      updatePriceDisplay();
+    });
+  });
+
+  // Add-ons
+  const patchToggle = document.getElementById("patch-toggle");
+  const patchDescriptionInput = document.getElementById("patch-description");
+  patchToggle?.addEventListener("change", () => {
+    patchEnabled = patchToggle.checked;
+    patchDescriptionInput.classList.toggle("hidden", !patchEnabled);
+    if (!patchEnabled) patchDescriptionInput.value = "";
+    updatePriceDisplay();
+  });
+
+  const customizationToggle = document.getElementById("customization-toggle");
+  const customizationFields = document.getElementById("customization-fields");
+  const customizationNameInput = document.getElementById("customization-name");
+  const customizationNumberInput = document.getElementById("customization-number");
+  customizationToggle?.addEventListener("change", () => {
+    customizationEnabled = customizationToggle.checked;
+    customizationFields.classList.toggle("hidden", !customizationEnabled);
+    if (!customizationEnabled) {
+      customizationNameInput.value = "";
+      customizationNumberInput.value = "";
+    }
+    updatePriceDisplay();
   });
 
   // Size selection
@@ -206,14 +294,43 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Cart actions
+  function validateAddOns() {
+    const errorEl = document.getElementById("addon-error");
+    if (!errorEl) return true;
+    if (patchEnabled && !patchDescriptionInput.value.trim()) {
+      errorEl.textContent = "Please describe the patch you'd like (e.g. UCL).";
+      errorEl.classList.remove("hidden");
+      return false;
+    }
+    if (customizationEnabled && (!customizationNameInput.value.trim() || !customizationNumberInput.value.trim())) {
+      errorEl.textContent = "Please enter both a name and number for the customization.";
+      errorEl.classList.remove("hidden");
+      return false;
+    }
+    errorEl.classList.add("hidden");
+    return true;
+  }
+
+  function addCurrentSelectionToCart() {
+    if (!selectedSize) return false;
+    if (isCustomizable(p) && !validateAddOns()) return false;
+    addToCart(
+      p.slug,
+      selectedSize,
+      1,
+      selectedVersion,
+      isCustomizable(p) ? selectedSleeve : null,
+      isCustomizable(p) && patchEnabled ? { description: patchDescriptionInput.value.trim() } : null,
+      isCustomizable(p) && customizationEnabled ? { name: customizationNameInput.value.trim(), number: customizationNumberInput.value.trim() } : null
+    );
+    return true;
+  }
+
   document.getElementById("add-to-cart")?.addEventListener("click", () => {
-    if (!selectedSize) return;
-    addToCart(p.slug, selectedSize, 1, selectedVersion);
+    addCurrentSelectionToCart();
   });
   document.getElementById("buy-now")?.addEventListener("click", () => {
-    if (!selectedSize) return;
-    addToCart(p.slug, selectedSize, 1, selectedVersion);
-    window.location.href = "checkout.html";
+    if (addCurrentSelectionToCart()) window.location.href = "checkout.html";
   });
 
   // Related products
