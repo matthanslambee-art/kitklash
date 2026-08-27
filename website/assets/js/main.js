@@ -1,9 +1,19 @@
 /* KITKLASH shared front-end logic: layout injection, cart, search, nav, product cards. */
 
 const CART_KEY = "kitklash_cart";
+const ADMIN_KEY_STORAGE = "kitklash_admin_key";
 
 function formatPrice(n) {
   return "R" + n.toLocaleString("en-ZA");
+}
+
+/* The admin gate (admin.html) stores the entered password here after a
+   successful login; every admin-only API call sends it as the X-Admin-Key
+   header, which the Worker checks server-side. Empty string on any page
+   where the visitor never unlocked admin (harmless — the server just
+   rejects the request). */
+function getAdminKey() {
+  return sessionStorage.getItem(ADMIN_KEY_STORAGE) || "";
 }
 
 /* ---------- Layout injection ---------- */
@@ -25,6 +35,7 @@ function getActivePage() {
 }
 
 async function loadLayout() {
+  await initProducts();
   const headerHost = document.getElementById("site-header");
   const footerHost = document.getElementById("site-footer");
   const [headerHtml, footerHtml] = await Promise.all([

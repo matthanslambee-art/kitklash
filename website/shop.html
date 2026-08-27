@@ -147,7 +147,8 @@ Load More Archives
 <script src="assets/js/products.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await initProducts();
   const params = new URLSearchParams(location.search);
   const state = {
     league: new Set(),

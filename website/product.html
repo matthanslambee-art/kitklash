@@ -23,7 +23,8 @@
 <script src="assets/js/products.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await initProducts();
   const params = new URLSearchParams(location.search);
   const slug = params.get("slug") || "france-2006-away-zidane";
   const p = getProductBySlug(slug) || PRODUCTS[0];

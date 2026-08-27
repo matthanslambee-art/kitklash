@@ -1,46 +1,40 @@
-/* KITKLASH jersey requests — captured to localStorage as an admin backup log,
+/* KITKLASH jersey requests — backed by a real database (Cloudflare D1) via /api/requests,
    and sent directly to the shop's WhatsApp as the real notification channel. */
 
-const REQUESTS_STORAGE_KEY = "kitklash_requests";
 const WHATSAPP_NUMBER = "27608006616";
 
-function getRequests() {
-  try {
-    return JSON.parse(localStorage.getItem(REQUESTS_STORAGE_KEY)) || [];
-  } catch (e) {
-    console.error("Failed to parse saved jersey requests", e);
+async function getRequests() {
+  const res = await fetch("/api/requests", { headers: { "X-Admin-Key": getAdminKey() } });
+  if (!res.ok) {
+    console.error("Failed to load jersey requests", await res.text().catch(() => ""));
     return [];
   }
+  return res.json();
 }
 
-function saveRequestsList(list) {
-  localStorage.setItem(REQUESTS_STORAGE_KEY, JSON.stringify(list));
+async function saveNewRequest(request) {
+  const res = await fetch("/api/requests", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request)
+  });
+  if (!res.ok) throw new Error("Failed to save request");
+  return res.json();
 }
 
-function saveNewRequest(request) {
-  const list = getRequests();
-  const record = {
-    id: "req-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
-    createdAt: new Date().toISOString(),
-    status: "new",
-    ...request
-  };
-  list.unshift(record);
-  saveRequestsList(list);
-  return record;
+async function updateRequestStatus(id, status) {
+  await fetch(`/api/requests/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", "X-Admin-Key": getAdminKey() },
+    body: JSON.stringify({ status })
+  });
 }
 
-function updateRequestStatus(id, status) {
-  const list = getRequests();
-  const item = list.find(r => r.id === id);
-  if (item) {
-    item.status = status;
-    saveRequestsList(list);
-  }
-}
-
-function deleteRequest(id) {
-  saveRequestsList(getRequests().filter(r => r.id !== id));
+async function deleteRequest(id) {
+  await fetch(`/api/requests/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { "X-Admin-Key": getAdminKey() }
+  });
 }
 
 /* Builds a wa.me link pre-filled with the request details. The customer still

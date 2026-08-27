@@ -127,8 +127,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     errorEl.classList.add("hidden");
 
-    const saved = saveNewRequest(record);
-    window.open(buildRequestWhatsAppLink(saved), "_blank");
+    // Open the tab synchronously (still within the click gesture) so popup
+    // blockers don't block it once saveNewRequest's network call resolves below.
+    const whatsappTab = window.open("", "_blank");
+    const saved = await saveNewRequest(record);
+    const waUrl = buildRequestWhatsAppLink(saved);
+    if (whatsappTab) whatsappTab.location.href = waUrl;
+    else window.open(waUrl, "_blank");
 
     form.classList.add("hidden");
     const success = document.getElementById("request-success");

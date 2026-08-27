@@ -43,13 +43,9 @@
       <div>
         <span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">KITKLASH Management Hub</span>
         <h1 class="font-display-xl text-display-xl text-primary text-3xl lg:text-4xl uppercase mt-1">Product Catalog Admin</h1>
-        <p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl">Manage shirt listings, update stock status, add new vintage & modern arrivals, or export updated catalog code.</p>
+        <p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl">Manage shirt listings, update stock status, and add new vintage & modern arrivals — changes go live immediately.</p>
       </div>
       <div class="flex items-center gap-3">
-        <button id="open-export-btn" class="px-5 py-3 border border-stadium-grey hover:border-primary text-primary font-label-sm text-label-sm uppercase tracking-widest rounded-sm transition-colors flex items-center gap-2">
-          <span class="material-symbols-outlined text-[18px]">download</span>
-          <span>Export products.js</span>
-        </button>
         <button id="add-kit-btn" class="px-6 py-3 bg-primary text-pitch-black hover:bg-surface-tint font-label-sm text-label-sm uppercase tracking-widest rounded-sm transition-colors flex items-center gap-2 font-bold">
           <span class="material-symbols-outlined text-[20px]">add</span>
           <span>Add New Kit</span>
@@ -116,7 +112,6 @@
           <option value="onHand">Ready to Ship Only</option>
           <option value="latestDrop">Latest Drop Only</option>
         </select>
-        <button id="reset-catalog-btn" class="text-xs text-on-surface-variant hover:text-kit-accent-red transition-colors px-2 py-1 uppercase tracking-widest" title="Reset to original demo catalog">Reset Catalog</button>
       </div>
     </div>
 
@@ -145,7 +140,7 @@
     <div id="requests-view" class="hidden flex-col gap-8">
       <div class="bg-charcoal-depth border border-stadium-grey p-4 rounded-sm flex items-start gap-3">
         <span class="material-symbols-outlined text-outline text-[20px] mt-0.5">info</span>
-        <p class="text-xs text-on-surface-variant">Each request is sent straight to WhatsApp when a customer submits it — this list is a backup log in case a customer fills the form but doesn't hit send in WhatsApp.</p>
+        <p class="text-xs text-on-surface-variant">Each request is sent straight to WhatsApp when a customer submits it, and also saved here — so you'll see it below even if a customer never hits send in WhatsApp.</p>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -199,7 +194,7 @@
     <div id="orders-view" class="hidden flex-col gap-8">
       <div class="bg-charcoal-depth border border-stadium-grey p-4 rounded-sm flex items-start gap-3">
         <span class="material-symbols-outlined text-outline text-[20px] mt-0.5">info</span>
-        <p class="text-xs text-on-surface-variant">Each order is sent straight to WhatsApp when a customer checks out — this list is a backup log in case a customer fills the form but doesn't hit send in WhatsApp. Payment is arranged directly with the customer over WhatsApp.</p>
+        <p class="text-xs text-on-surface-variant">Each order is sent straight to WhatsApp when a customer checks out, and also saved here — so you'll see it below even if a customer never hits send in WhatsApp. Payment is arranged directly with the customer over WhatsApp.</p>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -425,27 +420,6 @@
   </div>
 </div>
 
-<!-- Export Modal -->
-<div id="export-modal" class="fixed inset-0 z-[100] bg-pitch-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-  <div class="bg-charcoal-depth border border-stadium-grey w-full max-w-3xl rounded-sm shadow-2xl p-6 flex flex-col gap-4">
-    <div class="flex items-center justify-between border-b border-stadium-grey pb-4">
-      <div>
-        <h3 class="font-display-xl text-xl text-primary uppercase">Export Catalog Code</h3>
-        <p class="text-xs text-outline mt-1">Copy or download this generated JavaScript to replace website/assets/js/products.js</p>
-      </div>
-      <button id="export-close-btn" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
-    </div>
-    <textarea id="export-textarea" readonly class="w-full h-80 bg-pitch-black border border-stadium-grey p-4 text-xs font-mono text-primary rounded-sm focus:outline-none resize-none"></textarea>
-    <div class="flex items-center justify-between pt-2">
-      <span id="export-status" class="text-xs text-primary hidden font-mono">Code copied to clipboard!</span>
-      <div class="flex items-center gap-3 ml-auto">
-        <button id="export-copy-btn" class="px-4 py-2 border border-stadium-grey hover:border-primary text-primary text-xs uppercase tracking-widest rounded-sm transition-colors">Copy Code</button>
-        <button id="export-download-btn" class="px-5 py-2 bg-primary text-pitch-black hover:bg-surface-tint font-bold text-xs uppercase tracking-widest rounded-sm transition-colors">Download products.js</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div id="site-footer"></div>
 
 <script src="assets/js/products.js"></script>
@@ -453,15 +427,19 @@
 <script src="assets/js/orders.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
+/* The gate itself is still just a client-side UI hide — the real enforcement
+   now happens server-side in website/worker.js, which checks this same value
+   (sent as the X-Admin-Key header) against the ADMIN_KEY secret before
+   allowing any write. A wrong/missing key here just means every admin API
+   call gets rejected with 401, not that the data is actually reachable. */
 const ADMIN_PASSWORD = "ASlambee07";
-const ADMIN_SESSION_KEY = "kitklash_admin_authed";
 
 function unlockAdmin() {
   document.getElementById("admin-gate").classList.add("hidden");
   document.getElementById("admin-main").classList.remove("hidden");
 }
 
-if (sessionStorage.getItem(ADMIN_SESSION_KEY) === "true") {
+if (getAdminKey() === ADMIN_PASSWORD) {
   unlockAdmin();
 }
 
@@ -469,7 +447,7 @@ document.getElementById("admin-gate-form").addEventListener("submit", e => {
   e.preventDefault();
   const input = document.getElementById("admin-gate-password");
   if (input.value === ADMIN_PASSWORD) {
-    sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
+    sessionStorage.setItem("kitklash_admin_key", input.value);
     unlockAdmin();
   } else {
     document.getElementById("admin-gate-error").classList.remove("hidden");
@@ -480,9 +458,9 @@ document.getElementById("admin-gate-form").addEventListener("submit", e => {
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadLayout();
-  renderAdminTable();
-  renderRequestsTable();
-  renderOrdersTable();
+  await renderAdminTable();
+  await renderRequestsTable();
+  await renderOrdersTable();
 
   // Tab switching
   document.getElementById("tab-btn-products")?.addEventListener("click", () => switchAdminTab("products"));
@@ -508,22 +486,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("modal-close-btn")?.addEventListener("click", closeProductModal);
   document.getElementById("modal-cancel-btn")?.addEventListener("click", closeProductModal);
 
-  // Export triggers
-  document.getElementById("open-export-btn")?.addEventListener("click", openExportModal);
-  document.getElementById("export-close-btn")?.addEventListener("click", () => {
-    document.getElementById("export-modal").classList.add("hidden");
-  });
-  document.getElementById("export-copy-btn")?.addEventListener("click", copyExportCode);
-  document.getElementById("export-download-btn")?.addEventListener("click", downloadExportFile);
-
-  // Reset trigger
-  document.getElementById("reset-catalog-btn")?.addEventListener("click", () => {
-    if (confirm("Are you sure you want to reset the catalog back to default demo items? Any custom added kits will be cleared.")) {
-      resetProductsCatalog();
-      renderAdminTable();
-    }
-  });
-
   // Form Auto Slug
   document.getElementById("form-name")?.addEventListener("input", (e) => {
     const slugInput = document.getElementById("form-slug");
@@ -533,13 +495,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Form Submit
-  document.getElementById("product-form")?.addEventListener("submit", (e) => {
+  document.getElementById("product-form")?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    saveProductFromForm();
+    await saveProductFromForm();
   });
 });
 
-function switchAdminTab(tab) {
+async function switchAdminTab(tab) {
   const tabs = {
     products: { btn: document.getElementById("tab-btn-products"), view: document.getElementById("products-view") },
     requests: { btn: document.getElementById("tab-btn-requests"), view: document.getElementById("requests-view") },
@@ -556,12 +518,17 @@ function switchAdminTab(tab) {
     btn.className = `admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest border-b-2 ${isActive ? active : inactive} hover:text-primary transition-colors`;
   });
 
-  if (tab === "requests") renderRequestsTable();
-  if (tab === "orders") renderOrdersTable();
+  if (tab === "requests") await renderRequestsTable();
+  if (tab === "orders") await renderOrdersTable();
 }
 
-function renderRequestsTable() {
-  const items = getRequests();
+async function handleRequestStatusChange(id, status) {
+  await updateRequestStatus(id, status);
+  await renderRequestsTable();
+}
+
+async function renderRequestsTable() {
+  const items = await getRequests();
   const search = (document.getElementById("requests-search")?.value || "").toLowerCase().trim();
   const statusFilter = document.getElementById("requests-status-filter")?.value || "all";
 
@@ -616,7 +583,7 @@ function renderRequestsTable() {
       </td>
       <td class="p-4 text-xs text-on-surface-variant max-w-xs">${r.notes || "—"}</td>
       <td class="p-4">
-        <select onchange="updateRequestStatus('${r.id}', this.value); renderRequestsTable();" class="px-2 py-1 rounded-sm text-xs font-mono uppercase border bg-pitch-black outline-none ${statusStyles[r.status] || statusStyles.new}">
+        <select onchange="handleRequestStatusChange('${r.id}', this.value)" class="px-2 py-1 rounded-sm text-xs font-mono uppercase border bg-pitch-black outline-none ${statusStyles[r.status] || statusStyles.new}">
           <option value="new" ${r.status === "new" ? "selected" : ""}>New</option>
           <option value="contacted" ${r.status === "contacted" ? "selected" : ""}>Contacted</option>
           <option value="fulfilled" ${r.status === "fulfilled" ? "selected" : ""}>Fulfilled</option>
@@ -632,15 +599,20 @@ function renderRequestsTable() {
     .join("");
 }
 
-function confirmDeleteRequest(id) {
+async function confirmDeleteRequest(id) {
   if (confirm("Delete this jersey request?")) {
-    deleteRequest(id);
-    renderRequestsTable();
+    await deleteRequest(id);
+    await renderRequestsTable();
   }
 }
 
-function renderOrdersTable() {
-  const items = getOrders();
+async function handleOrderStatusChange(id, status) {
+  await updateOrderStatus(id, status);
+  await renderOrdersTable();
+}
+
+async function renderOrdersTable() {
+  const items = await getOrders();
   const search = (document.getElementById("orders-search")?.value || "").toLowerCase().trim();
   const statusFilter = document.getElementById("orders-status-filter")?.value || "all";
 
@@ -693,7 +665,7 @@ function renderOrdersTable() {
       <td class="p-4 text-xs text-on-surface-variant max-w-xs">${o.address || "—"}</td>
       <td class="p-4 font-mono font-bold text-primary whitespace-nowrap">${o.total || "—"}</td>
       <td class="p-4">
-        <select onchange="updateOrderStatus('${o.id}', this.value); renderOrdersTable();" class="px-2 py-1 rounded-sm text-xs font-mono uppercase border bg-pitch-black outline-none ${statusStyles[o.status] || statusStyles.new}">
+        <select onchange="handleOrderStatusChange('${o.id}', this.value)" class="px-2 py-1 rounded-sm text-xs font-mono uppercase border bg-pitch-black outline-none ${statusStyles[o.status] || statusStyles.new}">
           <option value="new" ${o.status === "new" ? "selected" : ""}>New</option>
           <option value="contacted" ${o.status === "contacted" ? "selected" : ""}>Contacted</option>
           <option value="fulfilled" ${o.status === "fulfilled" ? "selected" : ""}>Fulfilled</option>
@@ -709,15 +681,15 @@ function renderOrdersTable() {
     .join("");
 }
 
-function confirmDeleteOrder(id) {
+async function confirmDeleteOrder(id) {
   if (confirm("Delete this order?")) {
-    deleteOrder(id);
-    renderOrdersTable();
+    await deleteOrder(id);
+    await renderOrdersTable();
   }
 }
 
-function renderAdminTable() {
-  const items = getProductsList();
+async function renderAdminTable() {
+  const items = PRODUCTS;
   const search = (document.getElementById("admin-search")?.value || "").toLowerCase().trim();
   const leagueFilter = document.getElementById("filter-league")?.value || "all";
   const categoryFilter = document.getElementById("filter-category")?.value || "all";
@@ -851,7 +823,7 @@ function closeProductModal() {
   document.getElementById("product-modal").classList.add("hidden");
 }
 
-function saveProductFromForm() {
+async function saveProductFromForm() {
   const editSlug = document.getElementById("form-edit-slug").value;
   const name = document.getElementById("form-name").value.trim();
   let slug = document.getElementById("form-slug").value.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
@@ -890,17 +862,17 @@ function saveProductFromForm() {
     authenticity: document.getElementById("form-authenticity").value.trim() || "Verified Original"
   };
 
-  saveProductItem(productObj);
+  await saveProductItem(productObj);
   closeProductModal();
-  renderAdminTable();
+  await renderAdminTable();
 }
 
-function toggleSoldOut(slug) {
+async function toggleSoldOut(slug) {
   const p = getProductBySlug(slug);
   if (p) {
     p.soldOut = !p.soldOut;
-    saveProductItem(p);
-    renderAdminTable();
+    await saveProductItem(p);
+    await renderAdminTable();
   }
 }
 
@@ -908,41 +880,12 @@ function editProductModal(slug) {
   openProductModal(slug);
 }
 
-function confirmDeleteProduct(slug) {
+async function confirmDeleteProduct(slug) {
   const p = getProductBySlug(slug);
   if (p && confirm(`Are you sure you want to delete "${p.name}" from the catalog?`)) {
-    deleteProductItem(slug);
-    renderAdminTable();
+    await deleteProductItem(slug);
+    await renderAdminTable();
   }
-}
-
-function openExportModal() {
-  const code = exportProductsCode();
-  document.getElementById("export-textarea").value = code;
-  document.getElementById("export-status").classList.add("hidden");
-  document.getElementById("export-modal").classList.remove("hidden");
-}
-
-function copyExportCode() {
-  const code = document.getElementById("export-textarea").value;
-  navigator.clipboard.writeText(code).then(() => {
-    const status = document.getElementById("export-status");
-    status.classList.remove("hidden");
-    setTimeout(() => status.classList.add("hidden"), 3000);
-  });
-}
-
-function downloadExportFile() {
-  const code = document.getElementById("export-textarea").value;
-  const blob = new Blob([code], { type: "application/javascript" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "products.js";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
 </script>
 </body>

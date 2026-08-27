@@ -182,7 +182,8 @@ Enter The Shop
 <script src="assets/js/products.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
+    await initProducts();
     const grid = document.getElementById("home-on-hand-grid");
     const featured = PRODUCTS.filter(p => p.onHand).slice(0, 4);
     grid.innerHTML = featured.map(productCardCompact).join("");

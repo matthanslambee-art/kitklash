@@ -115,7 +115,8 @@
 <script src="assets/js/orders.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await initProducts();
   const cart = getCart();
   const itemsHost = document.getElementById("checkout-items");
   const form = document.getElementById("checkout-form");
@@ -150,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   document.getElementById("checkout-subtotal").textContent = formatPrice(cartSubtotal());
 
-  form.addEventListener("submit", e => {
+  form.addEventListener("submit", async e => {
     e.preventDefault();
     if (!cart.length) return;
     errorEl.classList.add("hidden");
@@ -187,12 +188,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return `${item.qty}x ${p.name} (${variant})${addOns ? " + " + addOns : ""} — ${formatPrice(cartItemUnitPrice(item) * item.qty)}`;
     }).filter(Boolean);
 
-    const order = saveNewOrder({
+    // Open the tab synchronously (still within the click gesture) so popup
+    // blockers don't block it once saveNewOrder's network call resolves below.
+    const whatsappTab = window.open("", "_blank");
+    const order = await saveNewOrder({
       ...customer,
       items: itemLines,
       total: formatPrice(cartSubtotal())
     });
-    window.open(buildOrderWhatsAppLink(order), "_blank");
+    const waUrl = buildOrderWhatsAppLink(order);
+    if (whatsappTab) whatsappTab.location.href = waUrl;
+    else window.open(waUrl, "_blank");
 
     saveCart([]);
     form.classList.add("hidden");

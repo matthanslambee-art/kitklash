@@ -1,49 +1,41 @@
-/* KITKLASH orders — captured to localStorage as an admin backup log, and sent
-   directly to the shop's WhatsApp as the real order notification channel.
-   Mirrors assets/js/requests.js. Payment is arranged manually over WhatsApp
-   for now; the Yoco-based card checkout (api/create-checkout.js,
-   api/yoco-webhook.js) is built and ready for whenever that's switched on. */
+/* KITKLASH orders — backed by a real database (Cloudflare D1) via /api/orders, and also
+   sent directly to the shop's WhatsApp as the real-time order notification channel.
+   Mirrors assets/js/requests.js. Payment is arranged manually over WhatsApp for now. */
 
-const ORDERS_STORAGE_KEY = "kitklash_orders";
 const ORDERS_WHATSAPP_NUMBER = "27608006616";
 
-function getOrders() {
-  try {
-    return JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY)) || [];
-  } catch (e) {
-    console.error("Failed to parse saved orders", e);
+async function getOrders() {
+  const res = await fetch("/api/orders", { headers: { "X-Admin-Key": getAdminKey() } });
+  if (!res.ok) {
+    console.error("Failed to load orders", await res.text().catch(() => ""));
     return [];
   }
+  return res.json();
 }
 
-function saveOrdersList(list) {
-  localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(list));
+async function saveNewOrder(order) {
+  const res = await fetch("/api/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(order)
+  });
+  if (!res.ok) throw new Error("Failed to save order");
+  return res.json();
 }
 
-function saveNewOrder(order) {
-  const list = getOrders();
-  const record = {
-    id: "order-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
-    createdAt: new Date().toISOString(),
-    status: "new",
-    ...order
-  };
-  list.unshift(record);
-  saveOrdersList(list);
-  return record;
+async function updateOrderStatus(id, status) {
+  await fetch(`/api/orders/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", "X-Admin-Key": getAdminKey() },
+    body: JSON.stringify({ status })
+  });
 }
 
-function updateOrderStatus(id, status) {
-  const list = getOrders();
-  const item = list.find(o => o.id === id);
-  if (item) {
-    item.status = status;
-    saveOrdersList(list);
-  }
-}
-
-function deleteOrder(id) {
-  saveOrdersList(getOrders().filter(o => o.id !== id));
+async function deleteOrder(id) {
+  await fetch(`/api/orders/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { "X-Admin-Key": getAdminKey() }
+  });
 }
 
 /* Builds a wa.me link pre-filled with the order details. The customer still
