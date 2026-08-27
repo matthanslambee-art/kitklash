@@ -17,5 +17,12 @@
       "database_name": "kitklash",
       "database_id": "7e2fa16a-cf19-4281-813d-5c9b6aa57d50"
     }
+  ],
+  "secrets_store_secrets": [
+    {
+      "binding": "ADMIN_KEY",
+      "store_id": "00f6f9e1397540fa98e45af63734581f",
+      "secret_name": "admin-key"
+    }
   ]
 }

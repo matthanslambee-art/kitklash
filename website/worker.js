@@ -8,9 +8,11 @@ function json(data, status = 200) {
   });
 }
 
-function isAdmin(request, env) {
+async function isAdmin(request, env) {
   const key = request.headers.get("X-Admin-Key");
-  return !!key && key === env.ADMIN_KEY;
+  if (!key) return false;
+  const adminKey = await env.ADMIN_KEY.get();
+  return key === adminKey;
 }
 
 function rowToProduct(row) {
@@ -53,7 +55,7 @@ export default {
       }
 
       if (path === "/api/products" && (method === "POST" || method === "PUT")) {
-        if (!isAdmin(request, env)) return json({ error: "Unauthorized" }, 401);
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
         const p = await request.json();
         if (!p.slug) return json({ error: "Missing slug" }, 400);
         await env.DB.prepare(`
@@ -79,14 +81,14 @@ export default {
 
       const productSlugMatch = path.match(/^\/api\/products\/([^/]+)$/);
       if (productSlugMatch && method === "DELETE") {
-        if (!isAdmin(request, env)) return json({ error: "Unauthorized" }, 401);
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
         await env.DB.prepare("DELETE FROM products WHERE slug = ?").bind(decodeURIComponent(productSlugMatch[1])).run();
         return json({ ok: true });
       }
 
       // ---------------- Orders ----------------
       if (path === "/api/orders" && method === "GET") {
-        if (!isAdmin(request, env)) return json({ error: "Unauthorized" }, 401);
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
         const { results } = await env.DB.prepare("SELECT * FROM orders ORDER BY createdAt DESC").all();
         return json(results.map(r => rowToRecord(r, ["items"])));
       }
@@ -106,20 +108,20 @@ export default {
 
       const orderIdMatch = path.match(/^\/api\/orders\/([^/]+)$/);
       if (orderIdMatch && method === "PATCH") {
-        if (!isAdmin(request, env)) return json({ error: "Unauthorized" }, 401);
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
         const { status } = await request.json();
         await env.DB.prepare("UPDATE orders SET status = ? WHERE id = ?").bind(status, decodeURIComponent(orderIdMatch[1])).run();
         return json({ ok: true });
       }
       if (orderIdMatch && method === "DELETE") {
-        if (!isAdmin(request, env)) return json({ error: "Unauthorized" }, 401);
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
         await env.DB.prepare("DELETE FROM orders WHERE id = ?").bind(decodeURIComponent(orderIdMatch[1])).run();
         return json({ ok: true });
       }
 
       // ---------------- Jersey Requests ----------------
       if (path === "/api/requests" && method === "GET") {
-        if (!isAdmin(request, env)) return json({ error: "Unauthorized" }, 401);
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
         const { results } = await env.DB.prepare("SELECT * FROM requests ORDER BY createdAt DESC").all();
         return json(results);
       }
@@ -139,13 +141,13 @@ export default {
 
       const reqIdMatch = path.match(/^\/api\/requests\/([^/]+)$/);
       if (reqIdMatch && method === "PATCH") {
-        if (!isAdmin(request, env)) return json({ error: "Unauthorized" }, 401);
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
         const { status } = await request.json();
         await env.DB.prepare("UPDATE requests SET status = ? WHERE id = ?").bind(status, decodeURIComponent(reqIdMatch[1])).run();
         return json({ ok: true });
       }
       if (reqIdMatch && method === "DELETE") {
-        if (!isAdmin(request, env)) return json({ error: "Unauthorized" }, 401);
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
         await env.DB.prepare("DELETE FROM requests WHERE id = ?").bind(decodeURIComponent(reqIdMatch[1])).run();
         return json({ ok: true });
       }
