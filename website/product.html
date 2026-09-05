@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const gallery = p.gallery && p.gallery.length ? p.gallery : [p.img];
   let selectedSize = p.sizes[0] || null;
   const versions = getVersions(p);
-  let selectedVersion = isCustomizable(p) ? "player" : versions[0];
+  let selectedVersion = versions.includes("player") ? "player" : versions[0];
   let selectedSleeve = "short";
   let patchEnabled = false;
   let customizationEnabled = false;
@@ -70,16 +70,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           </div>
           <hr class="border-t border-stadium-grey w-full"/>
           ${isCustomizable(p) ? `
+          ${versions.length > 1 ? `
           <div class="flex flex-col gap-4">
             <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Select Version</h3>
             <div class="grid grid-cols-2 gap-3" id="version-select">
-              ${["fan", "player"]
+              ${versions
                 .map(
                   v => `<button data-version="${v}" class="version-opt py-4 border font-label-sm text-label-sm uppercase transition-colors ${v === selectedVersion ? "border-primary text-primary bg-charcoal-depth" : "border-stadium-grey text-on-surface-variant hover:border-primary hover:text-primary"}">${versionLabel(v)}</button>`
                 )
                 .join("")}
             </div>
           </div>
+          ` : ""}
           <div class="flex flex-col gap-4">
             <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Select Sleeve</h3>
             <div class="grid grid-cols-2 gap-3" id="sleeve-select">

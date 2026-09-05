@@ -202,7 +202,8 @@ function cartItemUnitPrice(item) {
 
 function cartItemOptionsLabel(item) {
   const parts = [`Size ${item.size}`];
-  if (item.version) parts.push(versionLabel(item.version));
+  const p = getProductBySlug(item.slug);
+  if (item.version && p && getVersions(p).length > 1) parts.push(versionLabel(item.version));
   if (item.sleeve) parts.push(sleeveLabel(item.sleeve));
   if (item.patch) parts.push(`Patch: ${item.patch.description}`);
   if (item.customization) parts.push(`Name/Number: ${item.customization.name} / ${item.customization.number}`);

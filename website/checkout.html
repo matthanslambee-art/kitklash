@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const itemLines = cart.map(item => {
       const p = getProductBySlug(item.slug);
       if (!p) return null;
-      const variant = [item.size, item.version ? versionLabel(item.version) : null, item.sleeve ? sleeveLabel(item.sleeve) : null].filter(Boolean).join(" / ");
+      const variant = [item.size, item.version && getVersions(p).length > 1 ? versionLabel(item.version) : null, item.sleeve ? sleeveLabel(item.sleeve) : null].filter(Boolean).join(" / ");
       const addOns = [
         item.patch ? `Patch: ${item.patch.description}` : null,
         item.customization ? `Name/Number: ${item.customization.name} / ${item.customization.number}` : null
