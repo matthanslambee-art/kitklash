@@ -3,6 +3,17 @@
 <head>
 <meta charset="utf-8"/>
 <title id="doc-title">KITKLASH — Archive</title>
+<meta id="doc-description" name="description" content="Shop authentic-look vintage and modern football jerseys at KITKLASH, made to order in every size."/>
+<link id="doc-canonical" rel="canonical" href="https://kitklash.co.za/product.html"/>
+<meta id="doc-og-type" property="og:type" content="product"/>
+<meta id="doc-og-title" property="og:title" content="KITKLASH — Archive"/>
+<meta id="doc-og-description" property="og:description" content="Shop authentic-look vintage and modern football jerseys at KITKLASH, made to order in every size."/>
+<meta id="doc-og-url" property="og:url" content="https://kitklash.co.za/product.html"/>
+<meta id="doc-og-image" property="og:image" content="https://kitklash.co.za/assets/img/logo.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta id="doc-twitter-title" name="twitter:title" content="KITKLASH — Archive"/>
+<meta id="doc-twitter-description" name="twitter:description" content="Shop authentic-look vintage and modern football jerseys at KITKLASH."/>
+<meta id="doc-twitter-image" name="twitter:image" content="https://kitklash.co.za/assets/img/logo.png"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <link rel="icon" type="image/png" href="assets/img/logo.png"/>
 <style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;overflow-x:hidden;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}@media (max-width:640px){.text-display-xl{font-size:42px!important;line-height:46px!important;}.text-headline-lg{font-size:32px!important;line-height:38px!important;}}</style>
@@ -28,7 +39,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(location.search);
   const slug = params.get("slug") || "france-2006-away-zidane";
   const p = getProductBySlug(slug) || PRODUCTS[0];
-  document.getElementById("doc-title").textContent = p.name + " — KITKLASH";
+  const pageTitle = p.name + " — KITKLASH";
+  const pageUrl = "https://kitklash.co.za/product.html?slug=" + encodeURIComponent(p.slug);
+  const pageDescription = [p.name, p.kitType, "jersey."].filter(Boolean).join(" ")
+    + " " + (p.story ? p.story.slice(0, 140) : "Shop authentic-look football jerseys at KITKLASH, made to order in every size.");
+  const pageImage = p.img
+    ? "https://kitklash.co.za/" + p.img.replace(/^\//, "").split("/").map(encodeURIComponent).join("/")
+    : "https://kitklash.co.za/assets/img/logo.png";
+  document.getElementById("doc-title").textContent = pageTitle;
+  document.getElementById("doc-description").setAttribute("content", pageDescription);
+  document.getElementById("doc-canonical").setAttribute("href", pageUrl);
+  document.getElementById("doc-og-title").setAttribute("content", pageTitle);
+  document.getElementById("doc-og-description").setAttribute("content", pageDescription);
+  document.getElementById("doc-og-url").setAttribute("content", pageUrl);
+  document.getElementById("doc-og-image").setAttribute("content", pageImage);
+  document.getElementById("doc-twitter-title").setAttribute("content", pageTitle);
+  document.getElementById("doc-twitter-description").setAttribute("content", pageDescription);
+  document.getElementById("doc-twitter-image").setAttribute("content", pageImage);
 
   const gallery = p.gallery && p.gallery.length ? p.gallery : [p.img];
   let selectedSize = p.sizes[0] || null;

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /checkout.html
+Disallow: /checkout-success.html
+Disallow: /api/
+
+Sitemap: https://kitklash.co.za/sitemap.xml
