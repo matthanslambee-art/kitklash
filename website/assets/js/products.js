@@ -156,7 +156,8 @@ function getBasePrice(p, version, sleeve) {
 }
 
 function getDisplayFromPrice(p) {
-  return p.pricing.player.short;
+  const version = p.pricing.player ? "player" : getVersions(p)[0];
+  return p.pricing[version].short;
 }
 
 function sleeveLabel(s) {
