@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     state.league.forEach(l => chips.push({ label: getLeagueLabel(l), clear: () => state.league.delete(l) }));
     state.team.forEach(t => chips.push({ label: t, clear: () => state.team.delete(t) }));
     state.era.forEach(e =>
-      chips.push({ label: e === "vintage" ? "Vintage (Pre-2000)" : "Modern Classics", clear: () => state.era.delete(e) })
+      chips.push({ label: e === "vintage" ? "Vintage" : "Modern Classics", clear: () => state.era.delete(e) })
     );
     state.sizes.forEach(s => chips.push({ label: "Size: " + s, clear: () => state.sizes.delete(s) }));
     chipsEl.innerHTML = chips
