@@ -132,9 +132,13 @@ function getProductBySlug(slug) {
   return PRODUCTS.find(p => p.slug === slug);
 }
 
-/* Products without an explicit `versions` array are fan-version only —
-   the admin panel sets this explicitly when a product also has a player version. */
+/* The `pricing` object's own keys are the source of truth for which versions
+   a customizable product offers (some products only ever got a `pricing`
+   object with no accompanying `versions` array, so trusting `versions` alone
+   under-reports what's actually priced). Non-customizable products fall back
+   to their explicit `versions` array, or fan-only if that's absent too. */
 function getVersions(p) {
+  if (p.pricing) return Object.keys(p.pricing);
   return p.versions && p.versions.length ? p.versions : ["fan"];
 }
 
