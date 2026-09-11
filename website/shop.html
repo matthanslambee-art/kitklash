@@ -41,6 +41,13 @@ Showing <span id="shop-count" class="text-primary font-bold">0</span> Artifacts
 <aside id="shop-filters-desktop" class="w-full lg:w-1/4 xl:w-1/5 border-r border-stadium-grey hidden lg:block sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto no-scrollbar">
 <div class="p-8 flex flex-col gap-12">
 <div class="flex flex-col gap-6 border-b border-stadium-grey pb-8">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Category</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input type="checkbox" id="kids-check" class="w-4 h-4 accent-white"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Kids Sets</span>
+</label>
+</div>
+<div class="flex flex-col gap-6 border-b border-stadium-grey pb-8">
 <label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">League</label>
 <div class="flex flex-col gap-4" id="league-filters">
 <label class="flex items-center gap-4 cursor-pointer group">
@@ -114,6 +121,10 @@ Filter
 <!-- mobile filter panel -->
 <div id="mobile-filters" class="lg:hidden hidden flex-col gap-8 px-margin-mobile py-8 border-b border-stadium-grey">
 <div class="flex flex-col gap-4">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Category</label>
+<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="kids-check-mobile" class="w-4 h-4 accent-white"/><span class="font-body-md text-body-md text-on-surface-variant">Kids Sets</span></label>
+</div>
+<div class="flex flex-col gap-4">
 <label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">League</label>
 <div class="flex flex-col gap-3" id="league-filters-mobile">
 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="league-check w-4 h-4 accent-white" value="premier-league"/><span class="font-body-md text-body-md text-on-surface-variant">Premier League</span></label>
@@ -166,6 +177,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     team: new Set(),
     era: new Set(),
     sizes: new Set(),
+    kidsOnly: false,
     sort: "newest",
     page: 1,
     perPage: 9
@@ -176,6 +188,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (initialLeague && LEAGUES.some(l => l.slug === initialLeague)) state.league.add(initialLeague);
   const initialTeam = params.get("team");
   if (initialTeam) state.team.add(initialTeam);
+  if (params.get("kids") === "1") state.kidsOnly = true;
 
   const titleEl = document.getElementById("shop-title");
   const countEl = document.getElementById("shop-count");
@@ -213,6 +226,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function syncCheckboxes() {
     document.querySelectorAll(".league-check").forEach(cb => (cb.checked = state.league.has(cb.value)));
+    document.getElementById("kids-check").checked = state.kidsOnly;
+    document.getElementById("kids-check-mobile").checked = state.kidsOnly;
     document.querySelectorAll(".size-btn").forEach(btn => {
       const on = state.sizes.has(btn.dataset.size);
       btn.classList.toggle("border-primary", on);
@@ -228,6 +243,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (state.team.size && !state.team.has(p.team)) return false;
       if (state.era.size && !state.era.has(p.category)) return false;
       if (state.sizes.size && !p.sizes.some(s => state.sizes.has(s))) return false;
+      if (state.kidsOnly && p.badge !== "Kids") return false;
       return true;
     });
     switch (state.sort) {
@@ -247,6 +263,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       chips.push({ label: e === "vintage" ? "Vintage" : "Modern Classics", clear: () => state.era.delete(e) })
     );
     state.sizes.forEach(s => chips.push({ label: "Size: " + s, clear: () => state.sizes.delete(s) }));
+    if (state.kidsOnly) chips.push({ label: "Kids Sets", clear: () => (state.kidsOnly = false) });
     chipsEl.innerHTML = chips
       .map(
         (c, i) => `<div class="px-3 py-1 border border-stadium-grey font-label-sm text-label-sm text-primary flex items-center gap-2 uppercase tracking-widest">
@@ -265,6 +282,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       state.team.clear();
       state.era.clear();
       state.sizes.clear();
+      state.kidsOnly = false;
       render();
     });
   }
@@ -273,6 +291,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (state.team.size === 1) return Array.from(state.team)[0];
     if (state.league.size === 1) return getLeagueLabel(Array.from(state.league)[0]);
     if (state.era.size === 1) return state.era.has("vintage") ? "Vintage Archive" : "Modern Classics";
+    if (state.kidsOnly) return "Kids Sets";
     return "The Collection";
   }
 
@@ -307,6 +326,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.querySelectorAll(".size-btn").forEach(btn =>
     btn.addEventListener("click", () => {
       state.sizes.has(btn.dataset.size) ? state.sizes.delete(btn.dataset.size) : state.sizes.add(btn.dataset.size);
+      state.page = 1;
+      render();
+    })
+  );
+  document.querySelectorAll("#kids-check, #kids-check-mobile").forEach(cb =>
+    cb.addEventListener("change", e => {
+      state.kidsOnly = e.target.checked;
       state.page = 1;
       render();
     })
