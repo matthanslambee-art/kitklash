@@ -224,6 +224,9 @@
           <option value="contacted">Contacted</option>
           <option value="fulfilled">Fulfilled</option>
         </select>
+        <button id="log-order-btn" class="px-5 py-2.5 bg-primary text-pitch-black hover:bg-surface-tint font-label-sm text-label-sm uppercase tracking-widest rounded-sm transition-colors flex items-center gap-2 font-bold shrink-0">
+          <span class="material-symbols-outlined text-[18px]">add</span> Log Order
+        </button>
       </div>
 
       <div class="bg-charcoal-depth border border-stadium-grey rounded-sm overflow-x-auto">
@@ -421,6 +424,74 @@
   </div>
 </div>
 
+<!-- Log Order Modal -->
+<div id="order-modal" class="fixed inset-0 z-[100] bg-pitch-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-charcoal-depth border border-stadium-grey w-full max-w-lg rounded-sm shadow-2xl my-8 overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="px-6 py-4 border-b border-stadium-grey flex items-center justify-between bg-pitch-black/50">
+      <h3 class="font-display-xl text-xl text-primary uppercase">Log Order</h3>
+      <button id="order-modal-close-btn" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+    </div>
+
+    <form id="order-form" class="p-6 overflow-y-auto space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">First Name *</label>
+          <input id="order-form-firstName" type="text" required class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Surname *</label>
+          <input id="order-form-surname" type="text" required class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Phone</label>
+          <input id="order-form-phone" type="text" placeholder="WhatsApp / contact number" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Email</label>
+          <input id="order-form-email" type="email" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Delivery Address</label>
+        <input id="order-form-address" type="text" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+      </div>
+
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Items *</label>
+        <textarea id="order-form-items" rows="3" required placeholder="One item per line, e.g.&#10;1x Man Utd Home, size L&#10;1x Custom order not yet on the site" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary p-3 text-sm text-primary rounded-sm outline-none"></textarea>
+        <p class="text-xs text-outline mt-1">Doesn't have to match a listing on the site — type whatever the customer actually ordered.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Total *</label>
+          <input id="order-form-total" type="text" required placeholder="e.g. R700" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Status</label>
+          <select id="order-form-status" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none">
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="fulfilled">Fulfilled</option>
+          </select>
+        </div>
+      </div>
+
+      <p id="order-form-error" class="text-xs text-kit-accent-red uppercase tracking-widest hidden">Please fill in first name, surname, items, and total.</p>
+
+      <!-- Form Buttons -->
+      <div class="pt-4 border-t border-stadium-grey flex items-center justify-end gap-3">
+        <button type="button" id="order-modal-cancel-btn" class="px-5 py-2.5 border border-stadium-grey text-on-surface-variant hover:text-primary text-xs uppercase tracking-widest rounded-sm transition-colors">Cancel</button>
+        <button type="submit" class="px-6 py-2.5 bg-primary text-pitch-black hover:bg-surface-tint font-bold text-xs uppercase tracking-widest rounded-sm transition-colors">Save Order</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div id="site-footer"></div>
 
 <script src="assets/js/products.js"></script>
@@ -499,6 +570,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("product-form")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     await saveProductFromForm();
+  });
+
+  // Log Order modal
+  document.getElementById("log-order-btn")?.addEventListener("click", openOrderModal);
+  document.getElementById("order-modal-close-btn")?.addEventListener("click", closeOrderModal);
+  document.getElementById("order-modal-cancel-btn")?.addEventListener("click", closeOrderModal);
+  document.getElementById("order-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    await saveOrderFromForm();
   });
 });
 
@@ -866,6 +946,50 @@ async function saveProductFromForm() {
   await saveProductItem(productObj);
   closeProductModal();
   await renderAdminTable();
+}
+
+/* Manual order logging — for orders taken over WhatsApp/DM/in person that never
+   go through the site's own checkout. Items are free text, not tied to the
+   product catalog, since some orders are for jerseys not yet listed at all. */
+function openOrderModal() {
+  document.getElementById("order-form").reset();
+  document.getElementById("order-form-error").classList.add("hidden");
+  document.getElementById("order-modal").classList.remove("hidden");
+}
+
+function closeOrderModal() {
+  document.getElementById("order-modal").classList.add("hidden");
+}
+
+async function saveOrderFromForm() {
+  const firstName = document.getElementById("order-form-firstName").value.trim();
+  const surname = document.getElementById("order-form-surname").value.trim();
+  const itemsRaw = document.getElementById("order-form-items").value.trim();
+  const total = document.getElementById("order-form-total").value.trim();
+  const errorEl = document.getElementById("order-form-error");
+
+  if (!firstName || !surname || !itemsRaw || !total) {
+    errorEl.classList.remove("hidden");
+    return;
+  }
+  errorEl.classList.add("hidden");
+
+  const items = itemsRaw.split("\n").map(s => s.trim()).filter(Boolean);
+
+  const order = {
+    firstName,
+    surname,
+    email: document.getElementById("order-form-email").value.trim(),
+    phone: document.getElementById("order-form-phone").value.trim(),
+    address: document.getElementById("order-form-address").value.trim(),
+    items,
+    total,
+    status: document.getElementById("order-form-status").value
+  };
+
+  await saveNewOrder(order);
+  closeOrderModal();
+  await renderOrdersTable();
 }
 
 async function toggleSoldOut(slug) {
