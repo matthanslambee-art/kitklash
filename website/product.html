@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
             <span class="font-label-sm text-label-sm text-outline -mt-2">${p.condition}</span>
             <div class="grid grid-cols-3 gap-3" id="size-select">
-              ${["S", "M", "L", "XL", "2XL"]
+              ${(p.sizes.every(s => STANDARD_SIZES.includes(s)) ? STANDARD_SIZES : p.sizes)
                 .map(sz => {
                   const available = p.sizes.includes(sz);
                   const active = sz === selectedSize;

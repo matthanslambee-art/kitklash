@@ -2,6 +2,13 @@
    DEFAULT_PRODUCTS below is kept only as an offline fallback if the API is ever unreachable,
    not the live source of truth. */
 
+/* Standard adult sizing. Products with a different scheme entirely (e.g. Kids
+   Sets, sized by age like "3-4Y") carry their own `sizes` array instead — the
+   size selector shows this fixed universe (greying out anything a given
+   product doesn't carry) only when every one of the product's sizes falls
+   within it, and falls back to the product's own sizes otherwise. */
+const STANDARD_SIZES = ["S", "M", "L", "XL", "2XL"];
+
 /* League is the primary browsing category. Each jersey stores a `league` slug
    from this list; team-level filtering within a league is derived from the
    catalog at runtime, so adding a new team never requires touching this file. */
