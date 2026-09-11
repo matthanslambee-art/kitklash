@@ -61,6 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let selectedSize = p.sizes[0] || null;
   const versions = getVersions(p);
   let selectedVersion = isCustomizable(p) ? getPremiumVersion(p) : versions[0];
+  const hasLongSleeve = isCustomizable(p) && versions.some(v => "long" in p.pricing[v]);
   let selectedSleeve = "short";
   let patchEnabled = false;
   let customizationEnabled = false;
@@ -109,6 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
           </div>
           ` : ""}
+          ${hasLongSleeve ? `
           <div class="flex flex-col gap-4">
             <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Select Sleeve</h3>
             <div class="grid grid-cols-2 gap-3" id="sleeve-select">
@@ -119,6 +121,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 .join("")}
             </div>
           </div>
+          ` : ""}
           <div class="flex flex-col gap-4">
             <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Add-Ons</h3>
             <label class="flex items-center gap-3 cursor-pointer">
