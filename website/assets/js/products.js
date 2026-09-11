@@ -142,12 +142,14 @@ function getVersions(p) {
   return p.versions && p.versions.length ? p.versions : ["fan"];
 }
 
+const VERSION_LABELS = { fan: "Fan Version", player: "Player Version", jersey: "Jersey Only", set: "Full Set" };
 function versionLabel(v) {
-  return v === "player" ? "Player Version" : "Fan Version";
+  return VERSION_LABELS[v] || v;
 }
 
 /* Customizable replica-stock products carry a `pricing` object
-   ({ fan: {short, long}, player: {short, long} }) instead of relying solely
+   ({ fan: {short, long}, player: {short, long} }, or for kids sets
+   { jersey: {short, long}, set: {short, long} }) instead of relying solely
    on the flat `price` field, since price depends on the version/sleeve the
    customer picks. One-off archive pieces have no `pricing` object and keep
    the simple flat-price behavior untouched. */
@@ -159,8 +161,15 @@ function getBasePrice(p, version, sleeve) {
   return p.pricing[version][sleeve];
 }
 
+/* The default shown/selected version is always the priciest tier (Player over
+   Fan, Full Set over Jersey Only) — an upsell default, not the cheapest-first
+   default a plain price comparison would otherwise suggest. */
+function getPremiumVersion(p) {
+  return getVersions(p).reduce((best, v) => (p.pricing[v].short > p.pricing[best].short ? v : best));
+}
+
 function getDisplayFromPrice(p) {
-  const version = p.pricing.player ? "player" : getVersions(p)[0];
+  const version = getPremiumVersion(p);
   return p.pricing[version].short;
 }
 
