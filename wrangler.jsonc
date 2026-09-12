@@ -23,6 +23,11 @@
       "binding": "ADMIN_KEY",
       "store_id": "00f6f9e1397540fa98e45af63734581f",
       "secret_name": "admin-key"
+    },
+    {
+      "binding": "YOCO_SECRET_KEY",
+      "store_id": "00f6f9e1397540fa98e45af63734581f",
+      "secret_name": "yoco-secret-key"
     }
   ]
 }

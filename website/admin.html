@@ -195,7 +195,7 @@
     <div id="orders-view" class="hidden flex-col gap-8">
       <div class="bg-charcoal-depth border border-stadium-grey p-4 rounded-sm flex items-start gap-3">
         <span class="material-symbols-outlined text-outline text-[20px] mt-0.5">info</span>
-        <p class="text-xs text-on-surface-variant">Each order is sent straight to WhatsApp when a customer checks out, and also saved here — so you'll see it below even if a customer never hits send in WhatsApp. Payment is arranged directly with the customer over WhatsApp.</p>
+        <p class="text-xs text-on-surface-variant">Orders are saved here as soon as checkout starts, and automatically marked <span class="text-primary font-bold">Paid</span> once Yoco confirms the customer's card payment. Orders logged manually here (WhatsApp/DM/in person) don't go through Yoco — update their status by hand.</p>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -221,6 +221,7 @@
         <select id="orders-status-filter" class="bg-pitch-black border border-stadium-grey text-on-surface focus:border-primary text-sm px-3 py-2 rounded-sm outline-none">
           <option value="all">All Statuses</option>
           <option value="new">New</option>
+          <option value="paid">Paid</option>
           <option value="contacted">Contacted</option>
           <option value="fulfilled">Fulfilled</option>
         </select>
@@ -475,6 +476,7 @@
           <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Status</label>
           <select id="order-form-status" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none">
             <option value="new">New</option>
+            <option value="paid">Paid</option>
             <option value="contacted">Contacted</option>
             <option value="fulfilled">Fulfilled</option>
           </select>
@@ -727,6 +729,7 @@ async function renderOrdersTable() {
 
   const statusStyles = {
     new: "bg-kit-accent-red/20 text-kit-accent-red border-kit-accent-red/40",
+    paid: "bg-primary/20 text-primary border-primary/40",
     contacted: "bg-blue-500/20 text-blue-400 border-blue-500/40",
     fulfilled: "bg-green-500/20 text-green-400 border-green-500/40"
   };
@@ -748,6 +751,7 @@ async function renderOrdersTable() {
       <td class="p-4">
         <select onchange="handleOrderStatusChange('${o.id}', this.value)" class="px-2 py-1 rounded-sm text-xs font-mono uppercase border bg-pitch-black outline-none ${statusStyles[o.status] || statusStyles.new}">
           <option value="new" ${o.status === "new" ? "selected" : ""}>New</option>
+          <option value="paid" ${o.status === "paid" ? "selected" : ""}>Paid</option>
           <option value="contacted" ${o.status === "contacted" ? "selected" : ""}>Contacted</option>
           <option value="fulfilled" ${o.status === "fulfilled" ? "selected" : ""}>Fulfilled</option>
         </select>

@@ -1,8 +1,7 @@
-/* KITKLASH orders — backed by a real database (Cloudflare D1) via /api/orders, and also
-   sent directly to the shop's WhatsApp as the real-time order notification channel.
-   Mirrors assets/js/requests.js. Payment is arranged manually over WhatsApp for now. */
-
-const ORDERS_WHATSAPP_NUMBER = "27608006616";
+/* KITKLASH orders — backed by a real database (Cloudflare D1) via /api/orders.
+   Checkout payment runs through Yoco's hosted Checkout API (createYocoCheckout);
+   an order is only marked "paid" once the Worker's Yoco webhook confirms it
+   server-side (website/worker.js), never from the client-side redirect alone. */
 
 async function getOrders() {
   const res = await fetch("/api/orders", { headers: { "X-Admin-Key": getAdminKey() } });
@@ -38,23 +37,14 @@ async function deleteOrder(id) {
   });
 }
 
-/* Builds a wa.me link pre-filled with the order details. The customer still
-   has to hit Send in WhatsApp themselves — no link can do that automatically. */
-function buildOrderWhatsAppLink(order) {
-  const lines = [
-    "New Order — KITKLASH",
-    "",
-    `Name: ${order.firstName} ${order.surname}`.trim(),
-    `Email: ${order.email}`,
-    order.phone ? `Phone: ${order.phone}` : null,
-    `Delivery Address: ${order.address}`,
-    "",
-    "Items:",
-    ...order.items.map(line => `- ${line}`),
-    "",
-    `Total: ${order.total}`
-  ].filter(line => line !== null);
-
-  const text = encodeURIComponent(lines.join("\n"));
-  return `https://wa.me/${ORDERS_WHATSAPP_NUMBER}?text=${text}`;
+/* Creates a Yoco hosted checkout session for an already-saved order and
+   returns its redirectUrl. amount is in Rand; the Worker converts to cents. */
+async function createYocoCheckout(orderId, amount, lineItems) {
+  const res = await fetch("/api/yoco/create-checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId, amount, lineItems })
+  });
+  if (!res.ok) throw new Error("Failed to start Yoco checkout");
+  return res.json();
 }

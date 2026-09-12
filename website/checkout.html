@@ -25,6 +25,9 @@
 </section>
 
 <section class="w-full py-16">
+<div class="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop">
+<div id="payment-failed-banner" class="hidden mb-12 border border-kit-accent-red bg-charcoal-depth p-4 font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest">Your payment didn't go through. Your bag is still saved below — please try again.</div>
+</div>
 <div class="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-12">
 
   <form id="checkout-form" class="lg:col-span-7 flex flex-col gap-10">
@@ -76,10 +79,10 @@
 
     <div class="flex flex-col gap-4">
       <button type="submit" id="checkout-submit" class="bg-primary text-pitch-black font-label-sm text-label-sm px-8 py-5 uppercase tracking-widest hover:bg-surface-tint transition-colors border border-primary w-full flex items-center justify-center gap-2">
-        <span id="checkout-submit-label">Place Order Via WhatsApp</span>
+        <span id="checkout-submit-label">Proceed to Payment</span>
       </button>
       <p id="checkout-error" class="font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest hidden"></p>
-      <p class="font-label-sm text-label-sm text-outline text-[10px] uppercase tracking-widest text-center">We'll open WhatsApp with your order ready to send — we'll confirm details and arrange payment directly with you from there.</p>
+      <p class="font-label-sm text-label-sm text-outline text-[10px] uppercase tracking-widest text-center">You'll be taken to Yoco's secure payment page to complete your card payment.</p>
     </div>
   </form>
 
@@ -95,15 +98,6 @@
     </div>
   </div>
 
-</div>
-
-<div id="checkout-success" class="hidden max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop">
-  <div class="max-w-2xl flex flex-col gap-4 py-8">
-    <span class="material-symbols-outlined text-primary text-5xl">check_circle</span>
-    <h2 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tighter">Almost There</h2>
-    <p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">We've opened WhatsApp with your order ready to go — just hit send there and we'll confirm your order and arrange payment with you directly.</p>
-    <a href="shop.html" class="font-label-sm text-label-sm text-primary uppercase tracking-widest hover:text-surface-tint border-b border-primary w-fit pb-1 mt-2">Continue Browsing</a>
-  </div>
 </div>
 
 </section>
@@ -124,6 +118,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const errorEl = document.getElementById("checkout-error");
   const submitBtn = document.getElementById("checkout-submit");
   const submitLabel = document.getElementById("checkout-submit-label");
+
+  if (new URLSearchParams(location.search).get("payment") === "failed") {
+    document.getElementById("payment-failed-banner").classList.remove("hidden");
+  }
 
   if (!cart.length) {
     itemsHost.innerHTML = `<p class="font-body-md text-body-md text-on-surface-variant">Your bag is empty.</p>`;
@@ -189,23 +187,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       return `${item.qty}x ${p.name} (${variant})${addOns ? " + " + addOns : ""} — ${formatPrice(cartItemUnitPrice(item) * item.qty)}`;
     }).filter(Boolean);
 
-    // Open the tab synchronously (still within the click gesture) so popup
-    // blockers don't block it once saveNewOrder's network call resolves below.
-    const whatsappTab = window.open("", "_blank");
-    const order = await saveNewOrder({
-      ...customer,
-      items: itemLines,
-      total: formatPrice(cartSubtotal())
-    });
-    const waUrl = buildOrderWhatsAppLink(order);
-    if (whatsappTab) whatsappTab.location.href = waUrl;
-    else window.open(waUrl, "_blank");
+    const lineItems = cart.map(item => {
+      const p = getProductBySlug(item.slug);
+      if (!p) return null;
+      return {
+        displayName: p.name,
+        quantity: item.qty,
+        pricingDetails: { price: Math.round(cartItemUnitPrice(item) * 100) }
+      };
+    }).filter(Boolean);
 
-    saveCart([]);
-    form.classList.add("hidden");
-    const success = document.getElementById("checkout-success");
-    success.classList.remove("hidden");
-    success.classList.add("flex", "flex-col");
+    submitBtn.disabled = true;
+    submitLabel.textContent = "Redirecting to Payment…";
+
+    try {
+      const order = await saveNewOrder({
+        ...customer,
+        items: itemLines,
+        total: formatPrice(cartSubtotal())
+      });
+      const { redirectUrl } = await createYocoCheckout(order.id, cartSubtotal(), lineItems);
+      window.location.href = redirectUrl;
+    } catch (err) {
+      errorEl.textContent = "Something went wrong starting payment. Please try again.";
+      errorEl.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitLabel.textContent = "Proceed to Payment";
+    }
   });
 });
 </script>
