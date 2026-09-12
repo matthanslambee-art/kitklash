@@ -28,6 +28,11 @@
       "binding": "YOCO_SECRET_KEY",
       "store_id": "00f6f9e1397540fa98e45af63734581f",
       "secret_name": "yoco-secret-key"
+    },
+    {
+      "binding": "YOCO_WEBHOOK_SECRET",
+      "store_id": "00f6f9e1397540fa98e45af63734581f",
+      "secret_name": "yoco-webhook-secret"
     }
   ]
 }
