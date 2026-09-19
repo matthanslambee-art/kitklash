@@ -386,18 +386,20 @@
       <div class="space-y-3">
         <div>
           <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Main Thumbnail Image URL / Path *</label>
-          <div class="flex items-center gap-3 mb-2">
-            <input type="file" id="form-img-upload" accept="image/*" class="text-xs text-on-surface-variant"/>
-            <span id="form-img-upload-status" class="text-xs text-outline"></span>
+          <div id="form-img-dropzone" class="relative border border-dashed border-stadium-grey rounded-sm p-4 mb-2 text-center transition-colors">
+            <input type="file" id="form-img-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"/>
+            <p class="text-xs text-on-surface-variant pointer-events-none">Drag & drop an image here, or click to browse</p>
+            <span id="form-img-upload-status" class="text-xs text-outline pointer-events-none"></span>
           </div>
           <img id="form-img-preview" class="hidden w-20 h-20 mb-2 object-cover border border-stadium-grey rounded-sm"/>
           <input id="form-img" type="text" required placeholder="assets/img/shirt.png or https://..." class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none font-mono text-xs"/>
         </div>
         <div>
           <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Gallery Image URLs (comma-separated)</label>
-          <div class="flex items-center gap-3 mb-2">
-            <input type="file" id="form-gallery-upload" accept="image/*" multiple class="text-xs text-on-surface-variant"/>
-            <span id="form-gallery-upload-status" class="text-xs text-outline"></span>
+          <div id="form-gallery-dropzone" class="relative border border-dashed border-stadium-grey rounded-sm p-4 mb-2 text-center transition-colors">
+            <input type="file" id="form-gallery-upload" accept="image/*" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"/>
+            <p class="text-xs text-on-surface-variant pointer-events-none">Drag & drop images here, or click to browse</p>
+            <span id="form-gallery-upload-status" class="text-xs text-outline pointer-events-none"></span>
           </div>
           <div id="form-gallery-preview" class="hidden gap-2 mb-2 flex-wrap"></div>
           <input id="form-gallery" type="text" placeholder="https://image1.jpg, https://image2.jpg" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none font-mono text-xs"/>
@@ -596,6 +598,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Product image uploads
   document.getElementById("form-img-upload")?.addEventListener("change", handleMainImageUpload);
   document.getElementById("form-gallery-upload")?.addEventListener("change", handleGalleryImageUpload);
+  wireDropzone("form-img-dropzone", files => processMainImageFile(files[0]));
+  wireDropzone("form-gallery-dropzone", files => processGalleryImageFiles(files));
 });
 
 async function switchAdminTab(tab) {
@@ -985,8 +989,7 @@ async function uploadProductImage(blob, originalName) {
   return data.url;
 }
 
-async function handleMainImageUpload(e) {
-  const file = e.target.files[0];
+async function processMainImageFile(file) {
   if (!file) return;
   const statusEl = document.getElementById("form-img-upload-status");
   statusEl.textContent = "Uploading...";
@@ -1001,11 +1004,9 @@ async function handleMainImageUpload(e) {
   } catch (err) {
     statusEl.textContent = "Upload failed — try again";
   }
-  e.target.value = "";
 }
 
-async function handleGalleryImageUpload(e) {
-  const files = Array.from(e.target.files);
+async function processGalleryImageFiles(files) {
   if (!files.length) return;
   const statusEl = document.getElementById("form-gallery-upload-status");
   const previewHost = document.getElementById("form-gallery-preview");
@@ -1027,12 +1028,48 @@ async function handleGalleryImageUpload(e) {
       previewHost.appendChild(img);
     } catch (err) {
       statusEl.textContent = "Upload failed — try again";
-      e.target.value = "";
       return;
     }
   }
   statusEl.textContent = "Uploaded";
+}
+
+async function handleMainImageUpload(e) {
+  await processMainImageFile(e.target.files[0]);
   e.target.value = "";
+}
+
+async function handleGalleryImageUpload(e) {
+  await processGalleryImageFiles(Array.from(e.target.files));
+  e.target.value = "";
+}
+
+/* Wires a drop zone: dashed border highlights on drag-over, dropped files feed
+   the same upload path as clicking the (invisible, full-cover) file input. */
+function wireDropzone(zoneId, onFiles) {
+  const zone = document.getElementById(zoneId);
+  if (!zone) return;
+  ["dragenter", "dragover"].forEach(evt =>
+    zone.addEventListener(evt, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      zone.classList.add("border-primary", "bg-charcoal-depth");
+    })
+  );
+  ["dragleave", "dragend"].forEach(evt =>
+    zone.addEventListener(evt, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      zone.classList.remove("border-primary", "bg-charcoal-depth");
+    })
+  );
+  zone.addEventListener("drop", e => {
+    e.preventDefault();
+    e.stopPropagation();
+    zone.classList.remove("border-primary", "bg-charcoal-depth");
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+    if (files.length) onFiles(files);
+  });
 }
 
 async function saveProductFromForm() {
