@@ -101,13 +101,6 @@ export default {
     const method = request.method;
 
     try {
-      // ---------------- One-off data cleanup (remove after use) ----------------
-      if (path === "/api/admin/clear-authenticity" && method === "POST") {
-        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
-        const result = await env.DB.prepare("UPDATE products SET authenticity = ''").run();
-        return json({ ok: true, changes: result.meta.changes });
-      }
-
       // ---------------- Sitemap ----------------
       if (path === "/sitemap.xml" && method === "GET") {
         const staticPages = ["", "shop", "on-hand", "about", "request-jersey"];
