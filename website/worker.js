@@ -103,11 +103,11 @@ export default {
     try {
       // ---------------- Sitemap ----------------
       if (path === "/sitemap.xml" && method === "GET") {
-        const staticPages = ["", "shop.html", "on-hand.html", "about.html", "request-jersey.html"];
+        const staticPages = ["", "shop", "on-hand", "about", "request-jersey"];
         const { results } = await env.DB.prepare("SELECT slug FROM products").all();
         const urls = [
           ...staticPages.map(p => `https://kitklash.co.za/${p}`),
-          ...results.map(r => `https://kitklash.co.za/product.html?slug=${encodeURIComponent(r.slug)}`)
+          ...results.map(r => `https://kitklash.co.za/product?slug=${encodeURIComponent(r.slug)}`)
         ];
         const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
           .map(u => `  <url><loc>${u.replace(/&/g, "&amp;")}</loc></url>`)

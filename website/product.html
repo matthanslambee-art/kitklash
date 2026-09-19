@@ -4,11 +4,11 @@
 <meta charset="utf-8"/>
 <title id="doc-title">KITKLASH — Archive</title>
 <meta id="doc-description" name="description" content="Shop authentic-look vintage and modern football jerseys at KITKLASH, made to order in every size."/>
-<link id="doc-canonical" rel="canonical" href="https://kitklash.co.za/product.html"/>
+<link id="doc-canonical" rel="canonical" href="https://kitklash.co.za/product"/>
 <meta id="doc-og-type" property="og:type" content="product"/>
 <meta id="doc-og-title" property="og:title" content="KITKLASH — Archive"/>
 <meta id="doc-og-description" property="og:description" content="Shop authentic-look vintage and modern football jerseys at KITKLASH, made to order in every size."/>
-<meta id="doc-og-url" property="og:url" content="https://kitklash.co.za/product.html"/>
+<meta id="doc-og-url" property="og:url" content="https://kitklash.co.za/product"/>
 <meta id="doc-og-image" property="og:image" content="https://kitklash.co.za/assets/img/logo.png"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta id="doc-twitter-title" name="twitter:title" content="KITKLASH — Archive"/>
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const slug = params.get("slug") || "france-2006-away-zidane";
   const p = getProductBySlug(slug) || PRODUCTS[0];
   const pageTitle = p.name + " — KITKLASH";
-  const pageUrl = "https://kitklash.co.za/product.html?slug=" + encodeURIComponent(p.slug);
+  const pageUrl = "https://kitklash.co.za/product?slug=" + encodeURIComponent(p.slug);
   const pageDescription = [p.name, p.kitType, "jersey."].filter(Boolean).join(" ")
     + " " + (p.story ? p.story.slice(0, 140) : "Shop authentic-look football jerseys at KITKLASH, made to order in every size.");
   const pageImage = p.img
