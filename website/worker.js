@@ -140,6 +140,32 @@ export default {
         });
       }
 
+      // ---------------- One-off: fix mojibake text corruption ----------------
+      if (path === "/api/admin/fix-mojibake" && method === "POST") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        const fixes = [
+          {
+            slug: "ac-milan-2023-pleasures",
+            story:
+              "A limited streetwear collaboration kit, blending Milan's iconic red-and-black with PLEASURES' distinct graphic identity — a modern archive piece for collectors beyond the terrace."
+          },
+          {
+            slug: "brazil-2002-home",
+            story:
+              "The canary yellow of the Pentacampeões. Ronaldo, Rivaldo and Ronaldinho's front three wore this to a fifth World Cup star in Yokohama."
+          },
+          {
+            slug: "man-utd-2007-home",
+            story:
+              "The commemorative long-sleeve edition marking United's 2008 Champions League Final win over Chelsea in Moscow, embroidered with 'Final Moscow 2008 — 21st May, Luzhniki Stadium'. The crowning shirt of Cristiano Ronaldo's 2007/08 season, in which he scored 42 goals and claimed his first Ballon d'Or."
+          }
+        ];
+        for (const f of fixes) {
+          await env.DB.prepare("UPDATE products SET story = ? WHERE slug = ?").bind(f.story, f.slug).run();
+        }
+        return json({ ok: true, fixed: fixes.map(f => f.slug) });
+      }
+
       // ---------------- Products ----------------
       if (path === "/api/products" && method === "GET") {
         const { results } = await env.DB.prepare("SELECT * FROM products").all();
