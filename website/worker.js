@@ -115,6 +115,31 @@ export default {
         return new Response(xml, { headers: { "Content-Type": "application/xml" } });
       }
 
+      // ---------------- Image Uploads (R2) ----------------
+      if (path === "/api/admin/upload-image" && method === "POST") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        const form = await request.formData();
+        const file = form.get("file");
+        if (!file || typeof file === "string") return json({ error: "Missing file" }, 400);
+        const slug = (form.get("slug") || "misc").toString().replace(/[^a-z0-9-]/gi, "-").toLowerCase() || "misc";
+        const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "-");
+        const key = `uploads/${slug}/${Date.now()}-${safeName}`;
+        await env.IMAGES.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type || "application/octet-stream" } });
+        return json({ url: `/${key}` });
+      }
+
+      if (path.startsWith("/uploads/") && method === "GET") {
+        const key = decodeURIComponent(path.slice(1));
+        const obj = await env.IMAGES.get(key);
+        if (!obj) return json({ error: "Not found" }, 404);
+        return new Response(obj.body, {
+          headers: {
+            "Content-Type": obj.httpMetadata?.contentType || "application/octet-stream",
+            "Cache-Control": "public, max-age=31536000, immutable"
+          }
+        });
+      }
+
       // ---------------- Products ----------------
       if (path === "/api/products" && method === "GET") {
         const { results } = await env.DB.prepare("SELECT * FROM products").all();
