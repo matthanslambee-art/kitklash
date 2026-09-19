@@ -345,7 +345,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Condition</label>
           <input id="form-condition" type="text" placeholder="Mint Condition, Deadstock, etc." class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
@@ -353,10 +353,6 @@
         <div>
           <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Brand</label>
           <input id="form-brand" type="text" placeholder="Nike, Adidas, Umbro..." class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
-        </div>
-        <div>
-          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Authenticity</label>
-          <input id="form-authenticity" type="text" value="Verified Original" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
         </div>
       </div>
 
@@ -905,7 +901,6 @@ function openProductModal(editingSlug = "") {
       document.getElementById("form-badge").value = p.badge || "";
       document.getElementById("form-condition").value = p.condition || "";
       document.getElementById("form-brand").value = p.brand || "";
-      document.getElementById("form-authenticity").value = p.authenticity || "Verified Original";
       document.getElementById("form-img").value = p.img || "";
       document.getElementById("form-gallery").value = (p.gallery || []).join(", ");
       if (p.img) {
@@ -1107,8 +1102,7 @@ async function saveProductFromForm() {
     img: document.getElementById("form-img").value.trim(),
     gallery: gallery.length ? gallery : [document.getElementById("form-img").value.trim()],
     story: document.getElementById("form-story").value.trim(),
-    brand: document.getElementById("form-brand").value.trim() || "Adidas",
-    authenticity: document.getElementById("form-authenticity").value.trim() || "Verified Original"
+    brand: document.getElementById("form-brand").value.trim() || "Adidas"
   };
 
   await saveProductItem(productObj);

@@ -104,7 +104,7 @@ const DEFAULT_PRODUCTS = [
       "https://lh3.googleusercontent.com/aida-public/AB6AXuD_hkrXMPclE8V0zuUamlwW39ULiQAeufm-SNjIjFK35_rBbIGH0zZ8mOpX_g-8-luZGBnL9Jp0-sJ4e3lrEM8IVpjBKu3-Ja7rFhJERtwyryyTAyPSIYljCgQG9RhDb5ruCMydm_5L2NWi2lNJJZjHo1yJkkwd6dtZ5tuzu9Hy27WHHplC-xHZukljHpSNlNKAyGGsd-xwsneHzpCgITIZxfodPaaQbDqS1cwm-jM8AW2GvKS1sSU"
     ],
     story: "The white away kit worn by Zinedine Zidane during the 2006 World Cup campaign, culminating in the infamous final. This pristine piece of football history represents the twilight of a maestro's career. Features the distinct typography and chest crest synonymous with that era's French national team design language.",
-    brand: "Adidas", authenticity: "Verified Original"
+    brand: "Adidas"
   }
 ];
 

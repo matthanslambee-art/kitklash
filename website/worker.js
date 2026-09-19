@@ -166,7 +166,7 @@ export default {
           p.condition || "Excellent", p.price || 0, p.pricing ? JSON.stringify(p.pricing) : null,
           p.customizable ? 1 : 0, p.badge || null, p.onHand ? 1 : 0, p.latestDrop ? 1 : 0, p.soldOut ? 1 : 0,
           JSON.stringify(p.sizes || []), p.img || "", JSON.stringify(p.gallery || []), p.story || "",
-          p.brand || "", p.authenticity || "Verified Original", p.versions ? JSON.stringify(p.versions) : null
+          p.brand || "", p.authenticity || "", p.versions ? JSON.stringify(p.versions) : null
         ).run();
         return json({ ok: true });
       }
