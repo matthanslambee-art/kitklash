@@ -19,18 +19,18 @@ function getAdminKey() {
 /* ---------- Layout injection ---------- */
 
 function getActivePage() {
-  const file = location.pathname.split("/").pop() || "index.html";
+  const file = (location.pathname.split("/").pop() || "").replace(/\.html$/, "");
   const params = new URLSearchParams(location.search);
-  if (file === "" || file === "index.html") return "home";
-  if (file === "shop.html") {
+  if (file === "") return "home";
+  if (file === "shop") {
     const cat = params.get("category");
     if (cat === "vintage") return "vintage";
     if (cat === "modern") return "modern";
     return "shop";
   }
-  if (file === "on-hand.html") return "on-hand";
-  if (file === "about.html") return "about";
-  if (file === "admin.html") return "admin";
+  if (file === "on-hand") return "on-hand";
+  if (file === "about") return "about";
+  if (file === "admin") return "admin";
   return "";
 }
 
@@ -44,6 +44,8 @@ async function loadLayout() {
   ]);
   if (headerHost) headerHost.innerHTML = headerHtml;
   if (footerHost) footerHost.innerHTML = footerHtml;
+  const footerYear = document.getElementById("footer-year");
+  if (footerYear) footerYear.textContent = new Date().getFullYear();
 
   const active = getActivePage();
   document.querySelectorAll(".nav-link").forEach(a => {
@@ -120,17 +122,35 @@ function initHeaderBehavior() {
   cartOverlay?.addEventListener("click", closeCart);
   document.getElementById("cart-checkout")?.addEventListener("click", () => {
     if (!cartCount()) return;
-    window.location.href = "checkout.html";
+    window.location.href = "checkout";
   });
 
   const newsletterForm = document.getElementById("newsletter-form");
-  newsletterForm?.addEventListener("submit", e => {
+  newsletterForm?.addEventListener("submit", async e => {
     e.preventDefault();
     const msg = document.getElementById("newsletter-msg");
-    msg.textContent = "Subscribed — welcome to the Ultra.";
-    msg.classList.remove("hidden", "text-kit-accent-red");
-    msg.classList.add("text-primary");
-    newsletterForm.querySelector("input").value = "";
+    const input = newsletterForm.querySelector("input");
+    const submitBtn = newsletterForm.querySelector("button[type=submit]");
+    submitBtn.disabled = true;
+    try {
+      const res = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: input.value })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Something went wrong — try again.");
+      msg.textContent = "Subscribed — welcome to the Ultra.";
+      msg.classList.remove("hidden", "text-kit-accent-red");
+      msg.classList.add("text-primary");
+      input.value = "";
+    } catch (err) {
+      msg.textContent = err.message || "Something went wrong — try again.";
+      msg.classList.remove("hidden", "text-primary");
+      msg.classList.add("text-kit-accent-red");
+    } finally {
+      submitBtn.disabled = false;
+    }
   });
 }
 
@@ -151,7 +171,7 @@ function renderSearchResults(query) {
     matches
       .map(
         p => `
-    <a href="product.html?slug=${p.slug}" class="flex items-center justify-between gap-4 border-b border-stadium-grey pb-4 group">
+    <a href="product?slug=${p.slug}" class="flex items-center justify-between gap-4 border-b border-stadium-grey pb-4 group">
       <div class="flex flex-col">
         <span class="font-body-lg text-body-lg text-primary group-hover:text-surface-tint transition-colors">${p.name}</span>
         <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">${p.team} · ${p.year}${p.league ? " · " + getLeagueLabel(p.league) : ""}</span>
@@ -244,7 +264,7 @@ function updateCartUI() {
         return `
         <div class="flex gap-4">
           <div class="w-20 h-24 bg-surface-container-low overflow-hidden border border-stadium-grey shrink-0">
-            <img src="${p.img}" class="w-full h-full object-cover" alt="${p.name}"/>
+            <img src="${p.img}" loading="lazy" class="w-full h-full object-cover" alt="${p.name}"/>
           </div>
           <div class="flex-1 flex flex-col gap-1">
             <div class="flex justify-between gap-2">
@@ -284,11 +304,11 @@ function badgeLabel(p) {
 function productCardCompact(p) {
   const badge = badgeLabel(p);
   return `
-  <a href="product.html?slug=${p.slug}" class="group flex flex-col gap-4">
+  <a href="product?slug=${p.slug}" class="group flex flex-col gap-4">
     <div class="relative aspect-[3/4] bg-surface-container-low overflow-hidden shadow-lg border border-transparent group-hover:border-stadium-grey transition-all duration-500">
       ${badge ? `<div class="absolute top-4 left-4 z-10 border border-stadium-grey bg-pitch-black/80 backdrop-blur-sm px-3 py-1 font-label-sm text-label-sm text-primary uppercase tracking-widest shadow-sm">${badge}</div>` : ""}
       ${p.soldOut ? `<div class="absolute inset-0 bg-pitch-black/40 z-10 flex items-center justify-center"><span class="font-headline-md text-headline-md text-primary uppercase tracking-widest transform -rotate-12 bg-pitch-black border border-stadium-grey px-4 py-2">Sold Out</span></div>` : ""}
-      <img alt="${p.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out ${p.soldOut ? "grayscale" : ""}" src="${p.img}"/>
+      <img alt="${p.name}" loading="lazy" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out ${p.soldOut ? "grayscale" : ""}" src="${p.img}"/>
     </div>
     <div class="flex flex-col gap-1">
       <div class="flex justify-between items-start gap-4">
@@ -310,12 +330,12 @@ function productCardArtifact(p) {
       <span class="px-2 py-1 border border-stadium-grey bg-pitch-black/50 backdrop-blur font-label-sm text-label-sm text-primary uppercase tracking-widest text-[10px]">${p.year}</span>
       ${badge ? `<span class="px-2 py-1 border border-kit-accent-red text-kit-accent-red bg-pitch-black/50 backdrop-blur font-label-sm text-label-sm uppercase tracking-widest text-[10px]">${badge}</span>` : ""}
     </div>
-    <a href="product.html?slug=${p.slug}" class="flex-1 w-full relative overflow-hidden flex items-center justify-center p-8 mix-blend-screen ${p.soldOut ? "opacity-50 grayscale" : "opacity-90 group-hover:opacity-100"} transition-opacity">
-      <img class="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-700 ease-out" src="${p.img}" alt="${p.name}"/>
+    <a href="product?slug=${p.slug}" class="flex-1 w-full relative overflow-hidden flex items-center justify-center p-8 mix-blend-screen ${p.soldOut ? "opacity-50 grayscale" : "opacity-90 group-hover:opacity-100"} transition-opacity">
+      <img class="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" src="${p.img}" alt="${p.name}"/>
     </a>
     <div class="p-6 border-t border-stadium-grey bg-pitch-black flex flex-col gap-2 z-10 relative ${p.soldOut ? "opacity-50" : ""}">
       <div class="flex justify-between items-start">
-        <a href="product.html?slug=${p.slug}" class="flex-1 min-w-0"><h3 class="font-headline-md text-headline-md text-primary uppercase leading-tight line-clamp-2 break-words hover:text-surface-tint transition-colors">${p.team}</h3></a>
+        <a href="product?slug=${p.slug}" class="flex-1 min-w-0"><h3 class="font-headline-md text-headline-md text-primary uppercase leading-tight line-clamp-2 break-words hover:text-surface-tint transition-colors">${p.team}</h3></a>
         <span class="font-price-display text-price-display text-primary shrink-0">${isCustomizable(p) ? "From " + formatPrice(getDisplayFromPrice(p)) : formatPrice(p.price)}</span>
       </div>
       <div class="flex justify-between items-end mt-2">

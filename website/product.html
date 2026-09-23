@@ -16,6 +16,7 @@
 <meta id="doc-twitter-image" name="twitter:image" content="https://kitklash.co.za/assets/img/logo.png"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <link rel="icon" type="image/png" href="assets/img/logo.png"/>
+<script id="doc-jsonld" type="application/ld+json"></script>
 <style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;overflow-x:hidden;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}@media (max-width:640px){.text-display-xl{font-size:42px!important;line-height:46px!important;}.text-headline-lg{font-size:32px!important;line-height:38px!important;}}</style>
 <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -57,6 +58,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("doc-twitter-description").setAttribute("content", pageDescription);
   document.getElementById("doc-twitter-image").setAttribute("content", pageImage);
 
+  const availability = p.soldOut
+    ? "https://schema.org/OutOfStock"
+    : p.onHand
+    ? "https://schema.org/InStock"
+    : "https://schema.org/PreOrder";
+  document.getElementById("doc-jsonld").textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: p.name,
+    image: [pageImage],
+    description: pageDescription,
+    sku: p.slug,
+    brand: p.brand ? { "@type": "Brand", name: p.brand } : undefined,
+    offers: {
+      "@type": "Offer",
+      url: pageUrl,
+      priceCurrency: "ZAR",
+      price: p.price,
+      availability
+    }
+  });
+
   const gallery = p.gallery && p.gallery.length ? p.gallery : [p.img];
   let selectedSize = p.sizes[0] || null;
   const versions = getVersions(p);
@@ -79,7 +102,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             .map(
               (src, i) => `
             <button data-src="${src}" class="thumb-btn w-full aspect-square bg-charcoal-depth border ${i === 0 ? "border-primary" : "border-stadium-grey hover:border-outline"} overflow-hidden focus:outline-none rounded-sm transition-colors group">
-              <img class="w-full h-full object-cover ${i === 0 ? "opacity-100" : "opacity-60 group-hover:opacity-100"} transition-opacity" src="${src}"/>
+              <img class="w-full h-full object-cover ${i === 0 ? "opacity-100" : "opacity-60 group-hover:opacity-100"} transition-opacity" loading="lazy" src="${src}"/>
             </button>`
             )
             .join("")}
@@ -167,7 +190,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 })
                 .join("")}
             </div>
-            ${p.soldOut ? `<p class="font-label-sm text-label-sm text-kit-accent-red tracking-widest uppercase mt-2">Sold Out</p>` : `<p class="font-label-sm text-label-sm text-kit-accent-red tracking-widest uppercase mt-2">1 Available</p>`}
+            ${
+              p.soldOut
+                ? `<p class="font-label-sm text-label-sm text-kit-accent-red tracking-widest uppercase mt-2">Sold Out</p>`
+                : p.onHand
+                ? `<p class="font-label-sm text-label-sm text-primary tracking-widest uppercase mt-2">Ready to Ship</p>`
+                : `<p class="font-label-sm text-label-sm text-on-surface-variant tracking-widest uppercase mt-2">Made to Order — ships with the next monthly batch</p>`
+            }
           </div>
           <div class="flex flex-col gap-3 mt-4">
             <button id="add-to-cart" ${p.soldOut ? "disabled" : ""} class="w-full py-5 ${p.soldOut ? "bg-surface-container-high text-on-surface-variant cursor-not-allowed" : "bg-primary text-pitch-black hover:bg-surface-tint"} font-label-sm text-label-sm tracking-widest uppercase transition-colors flex items-center justify-center gap-2 group">
@@ -219,7 +248,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   <section class="max-w-container-max mx-auto w-full px-margin-mobile lg:px-margin-desktop py-12 lg:py-24">
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
       <h2 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tighter">You Might<br/>Also Like</h2>
-      <a class="font-label-sm text-label-sm text-primary tracking-widest uppercase border-b border-primary pb-1 hover:text-on-surface-variant hover:border-on-surface-variant transition-colors inline-block" href="shop.html">View All Archives</a>
+      <a class="font-label-sm text-label-sm text-primary tracking-widest uppercase border-b border-primary pb-1 hover:text-on-surface-variant hover:border-on-surface-variant transition-colors inline-block" href="shop">View All Archives</a>
     </div>
     <div id="related-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"></div>
   </section>
@@ -362,7 +391,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     addCurrentSelectionToCart();
   });
   document.getElementById("buy-now")?.addEventListener("click", () => {
-    if (addCurrentSelectionToCart()) window.location.href = "checkout.html";
+    if (addCurrentSelectionToCart()) window.location.href = "checkout";
   });
 
   // Related products
@@ -372,9 +401,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     .concat(fallback)
     .map(
       r => `
-    <a class="group flex flex-col gap-4" href="product.html?slug=${r.slug}">
+    <a class="group flex flex-col gap-4" href="product?slug=${r.slug}">
       <div class="w-full aspect-[3/4] bg-charcoal-depth overflow-hidden rounded-sm relative">
-        <img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src="${r.img}" alt="${r.name}"/>
+        <img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" loading="lazy" src="${r.img}" alt="${r.name}"/>
         ${r.badge ? `<div class="absolute top-4 left-4 px-2 py-1 border border-stadium-grey bg-pitch-black/50 backdrop-blur-md font-label-sm text-label-sm text-primary text-[10px] uppercase tracking-widest">${r.badge}</div>` : ""}
       </div>
       <div class="flex flex-col gap-1">

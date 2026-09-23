@@ -286,6 +286,38 @@ export default {
         return json({ ok: true });
       }
 
+      // ---------------- Newsletter ----------------
+      if (path === "/api/admin/init-subscribers-table" && method === "POST") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        await env.DB.prepare(
+          "CREATE TABLE IF NOT EXISTS subscribers (email TEXT PRIMARY KEY, createdAt TEXT NOT NULL)"
+        ).run();
+        return json({ ok: true });
+      }
+
+      if (path === "/api/subscribe" && method === "POST") {
+        const { email } = await request.json();
+        const clean = (email || "").trim().toLowerCase();
+        if (!clean || !clean.includes("@")) return json({ error: "Enter a valid email address." }, 400);
+        await env.DB.prepare("INSERT INTO subscribers (email, createdAt) VALUES (?, ?) ON CONFLICT(email) DO NOTHING")
+          .bind(clean, new Date().toISOString())
+          .run();
+        return json({ ok: true });
+      }
+
+      if (path === "/api/subscribers" && method === "GET") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        const { results } = await env.DB.prepare("SELECT * FROM subscribers ORDER BY createdAt DESC").all();
+        return json(results);
+      }
+
+      const subEmailMatch = path.match(/^\/api\/subscribers\/([^/]+)$/);
+      if (subEmailMatch && method === "DELETE") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        await env.DB.prepare("DELETE FROM subscribers WHERE email = ?").bind(decodeURIComponent(subEmailMatch[1])).run();
+        return json({ ok: true });
+      }
+
       return json({ error: "Not found" }, 404);
     } catch (err) {
       return json({ error: err.message || "Server error" }, 500);
