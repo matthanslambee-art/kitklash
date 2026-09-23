@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <h3 class="font-label-sm text-label-sm text-primary tracking-widest uppercase">Select Size</h3>
               <button type="button" class="size-guide-trigger font-label-sm text-label-sm text-outline hover:text-primary transition-colors underline underline-offset-4 decoration-stadium-grey hover:decoration-primary">Size Guide</button>
             </div>
-            <span class="font-label-sm text-label-sm text-outline -mt-2">${p.condition}</span>
+            <span class="font-label-sm text-label-sm text-outline -mt-2">Condition: ${p.condition}</span>
             <div class="grid grid-cols-3 gap-3" id="size-select">
               ${(p.sizes.every(s => STANDARD_SIZES.includes(s)) ? STANDARD_SIZES : p.sizes)
                 .map(sz => {
