@@ -63,6 +63,7 @@
       <button id="tab-btn-products" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-primary border-b-2 border-primary">Products</button>
       <button id="tab-btn-requests" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Jersey Requests <span id="requests-badge" class="ml-1 px-2 py-0.5 rounded-full bg-kit-accent-red text-primary text-[10px] hidden"></span></button>
       <button id="tab-btn-orders" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Orders <span id="orders-badge" class="ml-1 px-2 py-0.5 rounded-full bg-kit-accent-red text-primary text-[10px] hidden"></span></button>
+      <button id="tab-btn-subscribers" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Newsletter</button>
     </div>
 
     <div id="products-view" class="flex flex-col gap-8">
@@ -249,6 +250,28 @@
             </tr>
           </thead>
           <tbody id="orders-table-body" class="divide-y divide-stadium-grey text-sm">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Newsletter View -->
+    <div id="subscribers-view" class="hidden flex-col gap-8">
+      <div class="bg-charcoal-depth border border-stadium-grey p-5 rounded-sm flex flex-col gap-1 w-fit">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Total Subscribers</span>
+        <span class="font-display-xl text-3xl text-primary" id="stat-subscribers-total">0</span>
+      </div>
+      <div class="bg-charcoal-depth border border-stadium-grey rounded-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stadium-grey bg-pitch-black/50 text-xs text-outline uppercase tracking-widest font-label-sm">
+              <th class="p-4">Email</th>
+              <th class="p-4">Subscribed</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="subscribers-table-body" class="divide-y divide-stadium-grey text-sm">
             <!-- Populated by JS -->
           </tbody>
         </table>
@@ -608,6 +631,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("tab-btn-products")?.addEventListener("click", () => switchAdminTab("products"));
   document.getElementById("tab-btn-requests")?.addEventListener("click", () => switchAdminTab("requests"));
   document.getElementById("tab-btn-orders")?.addEventListener("click", () => switchAdminTab("orders"));
+  document.getElementById("tab-btn-subscribers")?.addEventListener("click", () => switchAdminTab("subscribers"));
 
   // Search and Filter Listeners
   document.getElementById("admin-search")?.addEventListener("input", renderAdminTable);
@@ -675,7 +699,8 @@ async function switchAdminTab(tab) {
   const tabs = {
     products: { btn: document.getElementById("tab-btn-products"), view: document.getElementById("products-view") },
     requests: { btn: document.getElementById("tab-btn-requests"), view: document.getElementById("requests-view") },
-    orders: { btn: document.getElementById("tab-btn-orders"), view: document.getElementById("orders-view") }
+    orders: { btn: document.getElementById("tab-btn-orders"), view: document.getElementById("orders-view") },
+    subscribers: { btn: document.getElementById("tab-btn-subscribers"), view: document.getElementById("subscribers-view") }
   };
 
   const active = "text-primary border-primary";
@@ -690,6 +715,39 @@ async function switchAdminTab(tab) {
 
   if (tab === "requests") await renderRequestsTable();
   if (tab === "orders") await renderOrdersTable();
+  if (tab === "subscribers") await renderSubscribersTable();
+}
+
+async function renderSubscribersTable() {
+  const res = await fetch("/api/subscribers", { headers: { "X-Admin-Key": getAdminKey() } });
+  const items = res.ok ? await res.json() : [];
+  document.getElementById("stat-subscribers-total").textContent = items.length;
+  const tbody = document.getElementById("subscribers-table-body");
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-outline">No newsletter signups yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = items
+    .map(s => {
+      const date = new Date(s.createdAt);
+      return `<tr class="hover:bg-pitch-black/40 transition-colors">
+      <td class="p-4 text-primary">${s.email}</td>
+      <td class="p-4 text-xs text-outline whitespace-nowrap">${date.toLocaleDateString()}</td>
+      <td class="p-4 text-right">
+        <button onclick="confirmDeleteSubscriber('${s.email}')" class="p-1.5 text-on-surface-variant hover:text-kit-accent-red border border-stadium-grey rounded-sm transition-colors" title="Remove">
+          <span class="material-symbols-outlined text-[18px]">delete</span>
+        </button>
+      </td>
+    </tr>`;
+    })
+    .join("");
+}
+
+async function confirmDeleteSubscriber(email) {
+  if (confirm(`Remove ${email} from the newsletter list?`)) {
+    await fetch(`/api/subscribers/${encodeURIComponent(email)}`, { method: "DELETE", headers: { "X-Admin-Key": getAdminKey() } });
+    await renderSubscribersTable();
+  }
 }
 
 async function handleRequestStatusChange(id, status) {

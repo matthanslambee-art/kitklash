@@ -287,14 +287,6 @@ export default {
       }
 
       // ---------------- Newsletter ----------------
-      if (path === "/api/admin/init-subscribers-table" && method === "POST") {
-        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
-        await env.DB.prepare(
-          "CREATE TABLE IF NOT EXISTS subscribers (email TEXT PRIMARY KEY, createdAt TEXT NOT NULL)"
-        ).run();
-        return json({ ok: true });
-      }
-
       if (path === "/api/subscribe" && method === "POST") {
         const { email } = await request.json();
         const clean = (email || "").trim().toLowerCase();
