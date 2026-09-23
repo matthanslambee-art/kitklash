@@ -336,7 +336,6 @@
           <select id="form-category" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none">
             <option value="vintage">Vintage</option>
             <option value="modern">Modern</option>
-            <option value="tracksuit">Tracksuit</option>
           </select>
         </div>
         <div>
@@ -351,6 +350,7 @@
             <option value="Deadstock">Deadstock</option>
             <option value="Grail">Grail</option>
             <option value="Kids">Kids</option>
+            <option value="Tracksuit">Tracksuit</option>
             <option value="Sold Out">Sold Out</option>
           </select>
         </div>
@@ -878,7 +878,8 @@ async function renderAdminTable() {
       if (!matchName && !matchTeam && !matchPlayer && !matchBrand && !matchCountry) return false;
     }
     if (leagueFilter !== "all" && p.league !== leagueFilter) return false;
-    if (categoryFilter !== "all" && p.category !== categoryFilter) return false;
+    if (categoryFilter === "tracksuit" && p.badge !== "Tracksuit") return false;
+    if (categoryFilter !== "all" && categoryFilter !== "tracksuit" && p.category !== categoryFilter) return false;
     if (statusFilter === "available" && p.soldOut) return false;
     if (statusFilter === "soldOut" && !p.soldOut) return false;
     if (statusFilter === "onHand" && !p.onHand) return false;
@@ -1332,7 +1333,7 @@ function newBulkRow(id, file) {
     : {
         id, file, uploadedUrl: null, uploading: true, uploadFailed: false,
         team: "", year: new Date().getFullYear(), style: "", price: null, priceManuallySet: false,
-        league: "other-clubs", onHand: false, sizes: ["S", "M", "L", "XL", "2XL"]
+        league: "other-clubs", category: "modern", onHand: false, sizes: ["S", "M", "L", "XL", "2XL"]
       };
 }
 
@@ -1534,7 +1535,7 @@ function renderBulkTable() {
   } else {
     head.innerHTML = `<tr>
       <th class="p-2">Photo</th><th class="p-2">Team / Collection *</th><th class="p-2">Year</th><th class="p-2">Style *</th>
-      <th class="p-2">League</th><th class="p-2">Sizes</th><th class="p-2">On Hand</th><th class="p-2">Price (R)</th><th class="p-2">Slug</th><th class="p-2"></th>
+      <th class="p-2">League</th><th class="p-2">Category</th><th class="p-2">Sizes</th><th class="p-2">On Hand</th><th class="p-2">Price (R)</th><th class="p-2">Slug</th><th class="p-2"></th>
     </tr>`;
     body.innerHTML = bulkState.rows
       .map(
@@ -1546,6 +1547,10 @@ function renderBulkTable() {
         <td class="p-2"><select onchange="updateBulkRow(${row.id},'league',this.value)" class="bg-pitch-black border border-stadium-grey px-2 py-1 rounded-sm outline-none text-primary">${LEAGUES.map(
           l => `<option value="${l.slug}" ${row.league === l.slug ? "selected" : ""}>${l.label}</option>`
         ).join("")}</select></td>
+        <td class="p-2"><select onchange="updateBulkRow(${row.id},'category',this.value)" class="bg-pitch-black border border-stadium-grey px-2 py-1 rounded-sm outline-none text-primary">
+          <option value="modern" ${row.category === "modern" ? "selected" : ""}>Modern</option>
+          <option value="vintage" ${row.category === "vintage" ? "selected" : ""}>Vintage</option>
+        </select></td>
         <td class="p-2"><div id="bulk-sizes-${row.id}" class="flex gap-1">${sizeTogglesInner(row)}</div></td>
         <td class="p-2 text-center"><input type="checkbox" ${row.onHand ? "checked" : ""} onchange="updateBulkRow(${row.id},'onHand',this.checked)" class="w-4 h-4 accent-primary"/></td>
         <td class="p-2"><input id="bulk-price-input-${row.id}" type="number" value="${row.price ?? ""}" oninput="updateBulkRow(${row.id},'price',this.value)" class="w-20 bg-pitch-black border border-stadium-grey focus:border-primary px-2 py-1 rounded-sm outline-none text-primary"/></td>
@@ -1624,11 +1629,11 @@ async function saveAllBulk() {
         league: row.league,
         country: "",
         kitType: row.style.trim(),
-        category: "tracksuit",
+        category: row.category,
         condition: "Excellent",
         price: row.price || 0,
         customizable: false,
-        badge: null,
+        badge: "Tracksuit",
         onHand: row.onHand,
         latestDrop: false,
         soldOut: false,

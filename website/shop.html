@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (state.era.size && !state.era.has(p.category)) return false;
       if (state.sizes.size && !p.sizes.some(s => state.sizes.has(s))) return false;
       if (state.kidsOnly && p.badge !== "Kids") return false;
-      if (state.tracksuitsOnly && p.category !== "tracksuit") return false;
+      if (state.tracksuitsOnly && p.badge !== "Tracksuit") return false;
       return true;
     });
     switch (state.sort) {
