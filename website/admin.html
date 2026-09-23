@@ -1648,12 +1648,13 @@ async function saveAllBulk() {
 
   btn.disabled = false;
   await renderAdminTable();
-  document.getElementById("bulk-summary").textContent =
+  const finalMessage =
     `Saved ${results.saved} of ${bulkState.rows.length}.` + (results.skipped.length ? ` Skipped: ${results.skipped.join("; ")}` : "");
   if (!results.skipped.length) {
     bulkState.rows = [];
     renderBulkTable();
   }
+  document.getElementById("bulk-summary").textContent = finalMessage;
 }
 </script>
 </body>
