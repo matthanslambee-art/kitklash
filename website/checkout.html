@@ -94,9 +94,20 @@
       <h2 class="font-label-sm text-label-sm text-primary uppercase tracking-widest border-b border-stadium-grey pb-4">Order Summary</h2>
       <div id="checkout-items" class="flex flex-col gap-6"></div>
       <hr class="border-t border-stadium-grey"/>
+      <div class="flex flex-col gap-2">
+        <div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+          <span>Subtotal</span>
+          <span id="checkout-subtotal">R0</span>
+        </div>
+        <div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+          <span>Shipping (Nationwide)</span>
+          <span id="checkout-shipping">R100</span>
+        </div>
+      </div>
+      <hr class="border-t border-stadium-grey"/>
       <div class="flex justify-between font-label-sm text-label-sm text-primary uppercase tracking-widest">
-        <span>Subtotal</span>
-        <span id="checkout-subtotal">R0</span>
+        <span>Total</span>
+        <span id="checkout-total">R0</span>
       </div>
     </div>
   </div>
@@ -151,7 +162,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       })
       .join("");
   }
+  const SHIPPING_FLAT = 100;
   document.getElementById("checkout-subtotal").textContent = formatPrice(cartSubtotal());
+  document.getElementById("checkout-total").textContent = formatPrice(cartSubtotal() + SHIPPING_FLAT);
 
   form.addEventListener("submit", async e => {
     e.preventDefault();

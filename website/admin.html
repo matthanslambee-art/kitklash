@@ -435,6 +435,8 @@
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="L" checked class="accent-primary"/> L</label>
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="XL" class="accent-primary"/> XL</label>
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="2XL" class="accent-primary"/> 2XL</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="3XL" class="accent-primary"/> 3XL</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="4XL" class="accent-primary"/> 4XL</label>
         </div>
       </div>
 
@@ -1502,7 +1504,7 @@ function sizeTogglesInner(row) {
   if (bulkState.mode === "jersey" && row.badge === "Kids") {
     return `<span class="text-[10px] text-outline whitespace-nowrap">All ages (3-4Y–13-14Y)</span>`;
   }
-  return ["S", "M", "L", "XL", "2XL"]
+  return ["S", "M", "L", "XL", "2XL", "3XL", "4XL"]
     .map(
       s => `<button type="button" onclick="toggleBulkSize(${row.id}, '${s}')" class="px-1.5 py-0.5 text-[10px] border rounded-sm ${
         row.sizes.includes(s) ? "border-primary bg-primary text-pitch-black" : "border-stadium-grey text-outline"

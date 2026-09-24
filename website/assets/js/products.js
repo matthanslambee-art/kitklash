@@ -7,7 +7,7 @@
    size selector shows this fixed universe (greying out anything a given
    product doesn't carry) only when every one of the product's sizes falls
    within it, and falls back to the product's own sizes otherwise. */
-const STANDARD_SIZES = ["S", "M", "L", "XL", "2XL"];
+const STANDARD_SIZES = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
 
 /* League is the primary browsing category. Each jersey stores a `league` slug
    from this list; team-level filtering within a league is derived from the
@@ -175,9 +175,12 @@ function getPremiumVersion(p) {
   return getVersions(p).reduce((best, v) => (p.pricing[v].short > p.pricing[best].short ? v : best));
 }
 
+/* "From R___" should be the floor price across every version/sleeve
+   combination, not whatever getPremiumVersion() upsells to by default on the
+   product page — otherwise a shopper can see a higher "From" price on the
+   card than the price they're shown after clicking in. */
 function getDisplayFromPrice(p) {
-  const version = getPremiumVersion(p);
-  return p.pricing[version].short;
+  return Math.min(...getVersions(p).flatMap(v => Object.values(p.pricing[v])));
 }
 
 function sleeveLabel(s) {

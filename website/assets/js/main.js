@@ -135,6 +135,10 @@ function initHeaderBehavior() {
       sizeGuideOverlay.classList.add("flex");
     }
   });
+  if (location.hash === "#size-guide" && sizeGuideOverlay) {
+    sizeGuideOverlay.classList.remove("hidden");
+    sizeGuideOverlay.classList.add("flex");
+  }
 
   const cartToggle = document.getElementById("cart-toggle");
   const cartClose = document.getElementById("cart-close");

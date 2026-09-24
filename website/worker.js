@@ -81,6 +81,7 @@ function versionLabel(v) { return VERSION_LABELS[v] || v; }
 function sleeveLabel(s) { return s === "long" ? "Long Sleeve" : "Short Sleeve"; }
 function clampStr(v, max) { return String(v ?? "").trim().slice(0, max); }
 const EMAIL_RE = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+const SHIPPING_FLAT = 100; // flat nationwide shipping, in Rand, added once per order
 
 /* Recomputes one cart line's price + description from a TRUSTED D1 product row
    (never from client input) — the client-supplied price/description used to be
@@ -306,6 +307,12 @@ export default {
         } catch (err) {
           return json({ error: err.message || "Invalid item in bag." }, 400);
         }
+
+        // Flat nationwide shipping, added once per order regardless of how
+        // many items or fulfillment paths it mixes — items ship separately as
+        // each becomes ready, but the customer is only charged once.
+        items.push(`Shipping (nationwide) — R${SHIPPING_FLAT.toLocaleString("en-ZA")}`);
+        total += SHIPPING_FLAT;
 
         // Built field-by-field — never spread the raw client object here (that
         // previously let a client set its own status/id/createdAt/total).
