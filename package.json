@@ -1,0 +1,10 @@
+{
+  "name": "kitklash-site",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./website/assets/css/tailwind-src.css -o ./website/assets/css/tailwind.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3"
+  }
+}
