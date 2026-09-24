@@ -16,12 +16,38 @@ function json(data, status = 200) {
   });
 }
 
+function getClientIp(request) {
+  return request.headers.get("CF-Connecting-IP") || "unknown";
+}
+
+/* Fixed-window counter in KV. Not a hard security boundary — KV is eventually
+   consistent across Cloudflare's edge, so this is a deterrent against casual
+   single-source scripted abuse, not a guarantee against a determined,
+   distributed attacker. */
+async function rateLimit(env, bucket, key, limit, windowSeconds) {
+  const kvKey = `rl:${bucket}:${key}`;
+  const current = Number(await env.RATE_LIMIT.get(kvKey)) || 0;
+  if (current >= limit) return false;
+  await env.RATE_LIMIT.put(kvKey, String(current + 1), { expirationTtl: windowSeconds });
+  return true;
+}
+
 async function isAdmin(request, env) {
   const key = request.headers.get("X-Admin-Key");
   if (!key) return false;
+
+  // Per-IP lockout after repeated failures — checked before the real key is
+  // even fetched, so a scripted brute-force attempt against any admin route
+  // gets throttled. Threshold is generous (10 failures / 15 min) because
+  // admin.html itself calls this on every page load and login attempt.
+  const lockKey = `rl:admin-fail:${getClientIp(request)}`;
+  const fails = Number(await env.RATE_LIMIT.get(lockKey)) || 0;
+  if (fails >= 10) return false;
+
   const adminKey = await env.ADMIN_KEY.get();
-  if (!adminKey || key.length !== adminKey.length) return false;
-  return timingSafeEqual(key, adminKey);
+  const ok = !!adminKey && key.length === adminKey.length && timingSafeEqual(key, adminKey);
+  if (!ok) await env.RATE_LIMIT.put(lockKey, String(fails + 1), { expirationTtl: 900 });
+  return ok;
 }
 
 function rowToProduct(row) {
@@ -245,6 +271,9 @@ export default {
       }
 
       if (path === "/api/orders" && method === "POST") {
+        if (!(await rateLimit(env, "orders", getClientIp(request), 5, 300))) {
+          return json({ error: "Too many requests. Please try again shortly." }, 429);
+        }
         let o;
         try { o = await request.json(); } catch { return json({ error: "Invalid request body." }, 400); }
 
@@ -367,6 +396,9 @@ export default {
       }
 
       if (path === "/api/requests" && method === "POST") {
+        if (!(await rateLimit(env, "requests", getClientIp(request), 5, 600))) {
+          return json({ error: "Too many requests. Please try again shortly." }, 429);
+        }
         let r;
         try { r = await request.json(); } catch { return json({ error: "Invalid request body." }, 400); }
         const firstName = clampStr(r.firstName, 80);
@@ -409,6 +441,9 @@ export default {
 
       // ---------------- Newsletter ----------------
       if (path === "/api/subscribe" && method === "POST") {
+        if (!(await rateLimit(env, "subscribe", getClientIp(request), 5, 600))) {
+          return json({ error: "Too many requests. Please try again shortly." }, 429);
+        }
         const { email } = await request.json();
         const clean = (email || "").trim().toLowerCase();
         // Deliberately strict (rejects quotes/angle brackets, not just "has an @") — this value
@@ -436,6 +471,9 @@ export default {
 
       // ---------------- Reviews ----------------
       if (path === "/api/reviews" && method === "POST") {
+        if (!(await rateLimit(env, "reviews", getClientIp(request), 5, 600))) {
+          return json({ error: "Too many requests. Please try again shortly." }, 429);
+        }
         const r = await request.json();
         if (r.website) return json({ ok: true }); // honeypot field — bots fill it, real visitors never see it
         const name = clampStr(r.name, 80);

@@ -25,6 +25,12 @@
       "bucket_name": "kitklash-images"
     }
   ],
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT",
+      "id": "9e248ea9022c40409244f68ea608cbbc"
+    }
+  ],
   "secrets_store_secrets": [
     {
       "binding": "ADMIN_KEY",
