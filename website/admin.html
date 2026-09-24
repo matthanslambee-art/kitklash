@@ -1016,7 +1016,7 @@ async function renderOrdersTable() {
       </td>
       <td class="p-4 text-xs text-on-surface-variant max-w-xs">${(o.items || []).map(escapeHtml).join("<br/>")}</td>
       <td class="p-4 text-xs text-on-surface-variant max-w-xs">${o.address ? escapeHtml(o.address) : "—"}</td>
-      <td class="p-4 font-mono font-bold text-primary whitespace-nowrap">${o.total ? escapeHtml(o.total) : "—"}</td>
+      <td class="p-4 font-mono font-bold text-primary whitespace-nowrap">${o.total !== undefined && o.total !== null && o.total !== "" ? (isNaN(Number(o.total)) ? escapeHtml(String(o.total)) : formatPrice(Number(o.total))) : "—"}</td>
       <td class="p-4">
         <select onchange="handleOrderStatusChange('${o.id}', this.value)" class="px-2 py-1 rounded-sm text-xs font-mono uppercase border bg-pitch-black outline-none ${statusStyles[o.status] || statusStyles.new}">
           <option value="new" ${o.status === "new" ? "selected" : ""}>New</option>

@@ -18,7 +18,10 @@ async function saveNewOrder(order) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(order)
   });
-  if (!res.ok) throw new Error("Failed to save order");
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to save order");
+  }
   return res.json();
 }
 
@@ -38,13 +41,17 @@ async function deleteOrder(id) {
 }
 
 /* Creates a Yoco hosted checkout session for an already-saved order and
-   returns its redirectUrl. amount is in Rand; the Worker converts to cents. */
-async function createYocoCheckout(orderId, amount, lineItems) {
+   returns its redirectUrl. The Worker looks up the order's server-computed
+   total itself — it never trusts a client-supplied amount. */
+async function createYocoCheckout(orderId) {
   const res = await fetch("/api/yoco/create-checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orderId, amount, lineItems })
+    body: JSON.stringify({ orderId })
   });
-  if (!res.ok) throw new Error("Failed to start Yoco checkout");
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to start Yoco checkout");
+  }
   return res.json();
 }

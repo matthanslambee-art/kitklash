@@ -179,40 +179,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const itemLines = cart.map(item => {
-      const p = getProductBySlug(item.slug);
-      if (!p) return null;
-      const variant = [item.size, item.version && getVersions(p).length > 1 ? versionLabel(item.version) : null, item.sleeve ? sleeveLabel(item.sleeve) : null].filter(Boolean).join(" / ");
-      const addOns = [
-        item.patch ? `Patch: ${item.patch.description}` : null,
-        item.customization ? `Name/Number: ${item.customization.name} / ${item.customization.number}` : null
-      ].filter(Boolean).join(", ");
-      return `${item.qty}x ${p.name} (${variant})${addOns ? " + " + addOns : ""} — ${formatPrice(cartItemUnitPrice(item) * item.qty)}`;
-    }).filter(Boolean);
-
-    const lineItems = cart.map(item => {
-      const p = getProductBySlug(item.slug);
-      if (!p) return null;
-      return {
-        displayName: p.name,
-        quantity: item.qty,
-        pricingDetails: { price: Math.round(cartItemUnitPrice(item) * 100) }
-      };
-    }).filter(Boolean);
-
     submitBtn.disabled = true;
     submitLabel.textContent = "Redirecting to Payment…";
 
     try {
-      const order = await saveNewOrder({
-        ...customer,
-        items: itemLines,
-        total: formatPrice(cartSubtotal())
-      });
-      const { redirectUrl } = await createYocoCheckout(order.id, cartSubtotal(), lineItems);
+      // The server looks up each item's real price and builds the order total
+      // itself from `cart` — it never trusts a client-computed total/description.
+      const order = await saveNewOrder({ ...customer, items: cart });
+      const { redirectUrl } = await createYocoCheckout(order.id);
       window.location.href = redirectUrl;
     } catch (err) {
-      errorEl.textContent = "Something went wrong starting payment. Please try again.";
+      errorEl.textContent = err.message || "Something went wrong starting payment. Please try again.";
       errorEl.classList.remove("hidden");
       submitBtn.disabled = false;
       submitLabel.textContent = "Proceed to Payment";
