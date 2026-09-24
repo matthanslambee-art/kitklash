@@ -1387,6 +1387,7 @@ async function saveOrderFromForm() {
   const errorEl = document.getElementById("order-form-error");
 
   if (!firstName || !surname || !itemsRaw || !total) {
+    errorEl.textContent = "Please fill in first name, surname, items, and total.";
     errorEl.classList.remove("hidden");
     return;
   }
@@ -1405,9 +1406,14 @@ async function saveOrderFromForm() {
     status: document.getElementById("order-form-status").value
   };
 
-  await saveNewOrder(order);
-  closeOrderModal();
-  await renderOrdersTable();
+  try {
+    await saveManualOrder(order);
+    closeOrderModal();
+    await renderOrdersTable();
+  } catch (err) {
+    errorEl.textContent = err.message || "Failed to save order.";
+    errorEl.classList.remove("hidden");
+  }
 }
 
 async function toggleSoldOut(slug) {

@@ -92,10 +92,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const res = await fetch("/api/reviews");
-    const reviews = res.ok ? await res.json() : [];
+    if (!res.ok) throw new Error("Failed to load reviews");
+    const reviews = await res.json();
     const listEl = document.getElementById("reviews-list");
     const emptyEl = document.getElementById("reviews-empty");
     if (!reviews.length) {
+      emptyEl.textContent = "No reviews yet — be the first to leave one below.";
       emptyEl.classList.remove("hidden");
     } else {
       const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
@@ -118,7 +120,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         .join("");
     }
   } catch (err) {
-    document.getElementById("reviews-empty").classList.remove("hidden");
+    const emptyEl = document.getElementById("reviews-empty");
+    emptyEl.textContent = "Couldn't load reviews right now — please refresh the page.";
+    emptyEl.classList.remove("hidden");
   }
 
   let selectedRating = 0;

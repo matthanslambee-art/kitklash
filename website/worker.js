@@ -323,6 +323,44 @@ export default {
         return json(record);
       }
 
+      // Manual order logging (admin only) — for orders taken over WhatsApp/DM/
+      // in person that never go through the site's own checkout. Free text,
+      // not tied to the product catalog, since some orders are for jerseys not
+      // yet listed at all — deliberately bypasses the catalog-priced /api/orders
+      // POST above, which is for real checkout traffic only.
+      if (path === "/api/admin/orders" && method === "POST") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        let o;
+        try { o = await request.json(); } catch { return json({ error: "Invalid request body." }, 400); }
+
+        const firstName = clampStr(o.firstName, 80);
+        const surname = clampStr(o.surname, 80);
+        if (!firstName || !surname) return json({ error: "Please fill in first name and surname." }, 400);
+
+        const items = Array.isArray(o.items) ? o.items.map(i => clampStr(i, 200)).filter(Boolean) : [];
+        if (!items.length) return json({ error: "Please add at least one item." }, 400);
+
+        const total = clampStr(o.total, 40);
+        if (!total) return json({ error: "Please enter a total." }, 400);
+
+        const status = ["new", "paid", "contacted", "fulfilled"].includes(o.status) ? o.status : "new";
+
+        const record = {
+          id: newId("order"), createdAt: new Date().toISOString(), status,
+          firstName, surname,
+          email: clampStr(o.email, 254), phone: clampStr(o.phone, 40), address: clampStr(o.address, 300),
+          items, total
+        };
+        await env.DB.prepare(`
+          INSERT INTO orders (id, createdAt, status, firstName, surname, email, phone, address, items, total)
+          VALUES (?,?,?,?,?,?,?,?,?,?)
+        `).bind(
+          record.id, record.createdAt, record.status, record.firstName, record.surname,
+          record.email, record.phone, record.address, JSON.stringify(record.items), record.total
+        ).run();
+        return json(record);
+      }
+
       const orderIdMatch = path.match(/^\/api\/orders\/([^/]+)$/);
       if (orderIdMatch && method === "PATCH") {
         if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);

@@ -132,6 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     if (!record.firstName || !record.surname || !record.email || !record.team) {
+      errorEl.textContent = "Please fill in all required fields.";
       errorEl.classList.remove("hidden");
       return;
     }
@@ -140,15 +141,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // Open the tab synchronously (still within the click gesture) so popup
     // blockers don't block it once saveNewRequest's network call resolves below.
     const whatsappTab = window.open("", "_blank");
-    const saved = await saveNewRequest(record);
-    const waUrl = buildRequestWhatsAppLink(saved);
-    if (whatsappTab) whatsappTab.location.href = waUrl;
-    else window.open(waUrl, "_blank");
+    try {
+      const saved = await saveNewRequest(record);
+      const waUrl = buildRequestWhatsAppLink(saved);
+      if (whatsappTab) whatsappTab.location.href = waUrl;
+      else window.open(waUrl, "_blank");
 
-    form.classList.add("hidden");
-    const success = document.getElementById("request-success");
-    success.classList.remove("hidden");
-    success.classList.add("flex");
+      form.classList.add("hidden");
+      const success = document.getElementById("request-success");
+      success.classList.remove("hidden");
+      success.classList.add("flex");
+    } catch (err) {
+      if (whatsappTab) whatsappTab.close();
+      errorEl.textContent = err.message || "Something went wrong — please try again.";
+      errorEl.classList.remove("hidden");
+    }
   });
 });
 </script>

@@ -18,7 +18,10 @@ async function saveNewRequest(request) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request)
   });
-  if (!res.ok) throw new Error("Failed to save request");
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to save request");
+  }
   return res.json();
 }
 

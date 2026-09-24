@@ -25,6 +25,22 @@ async function saveNewOrder(order) {
   return res.json();
 }
 
+/* For orders logged manually by the admin (WhatsApp/DM/in-person sales) —
+   free-text items/total, not run through the catalog-priced /api/orders POST
+   real checkout traffic uses. */
+async function saveManualOrder(order) {
+  const res = await fetch("/api/admin/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Admin-Key": getAdminKey() },
+    body: JSON.stringify(order)
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to save order");
+  }
+  return res.json();
+}
+
 async function updateOrderStatus(id, status) {
   await fetch(`/api/orders/${encodeURIComponent(id)}`, {
     method: "PATCH",
