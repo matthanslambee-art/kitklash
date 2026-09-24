@@ -184,6 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     sizes: new Set(),
     kidsOnly: false,
     tracksuitsOnly: false,
+    search: "",
     sort: "newest",
     page: 1,
     perPage: 9
@@ -196,6 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (initialTeam) state.team.add(initialTeam);
   if (params.get("kids") === "1") state.kidsOnly = true;
   if (params.get("tracksuits") === "1") state.tracksuitsOnly = true;
+  state.search = (params.get("q") || "").trim();
 
   const titleEl = document.getElementById("shop-title");
   const countEl = document.getElementById("shop-count");
@@ -254,6 +256,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (state.sizes.size && !p.sizes.some(s => state.sizes.has(s))) return false;
       if (state.kidsOnly && p.badge !== "Kids") return false;
       if (state.tracksuitsOnly && p.badge !== "Tracksuit") return false;
+      if (state.search) {
+        const tokens = state.search.toLowerCase().split(/\s+/).filter(Boolean);
+        const text = getSearchText(p);
+        if (!tokens.every(t => text.includes(t))) return false;
+      }
       return true;
     });
     switch (state.sort) {
@@ -275,6 +282,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     state.sizes.forEach(s => chips.push({ label: "Size: " + s, clear: () => state.sizes.delete(s) }));
     if (state.kidsOnly) chips.push({ label: "Kids Sets", clear: () => (state.kidsOnly = false) });
     if (state.tracksuitsOnly) chips.push({ label: "Tracksuits", clear: () => (state.tracksuitsOnly = false) });
+    if (state.search) chips.push({ label: `Search: "${state.search}"`, clear: () => (state.search = "") });
     chipsEl.innerHTML = chips
       .map(
         (c, i) => `<div class="px-3 py-1 border border-stadium-grey font-label-sm text-label-sm text-primary flex items-center gap-2 uppercase tracking-widest">
@@ -295,6 +303,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       state.sizes.clear();
       state.kidsOnly = false;
       state.tracksuitsOnly = false;
+      state.search = "";
       render();
     });
   }
@@ -305,6 +314,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (state.era.size === 1) return state.era.has("vintage") ? "Vintage Archive" : "Modern Classics";
     if (state.kidsOnly) return "Kids Sets";
     if (state.tracksuitsOnly) return "Tracksuits";
+    if (state.search) return `Results for "${state.search}"`;
     return "The Collection";
   }
 

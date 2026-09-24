@@ -94,6 +94,12 @@ function initHeaderBehavior() {
     searchOverlay.classList.remove("flex");
   });
   searchInput?.addEventListener("input", e => renderSearchResults(e.target.value));
+  searchInput?.addEventListener("keydown", e => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const query = e.target.value.trim();
+    if (query) window.location.href = `shop?q=${encodeURIComponent(query)}`;
+  });
 
   const sizeGuideOverlay = document.getElementById("size-guide-overlay");
   document.getElementById("size-guide-close")?.addEventListener("click", () => {
