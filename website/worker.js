@@ -311,17 +311,6 @@ export default {
       }
 
       // ---------------- Reviews ----------------
-      if (path === "/api/admin/init-reviews-table" && method === "POST") {
-        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
-        await env.DB.prepare(`
-          CREATE TABLE IF NOT EXISTS reviews (
-            id TEXT PRIMARY KEY, createdAt TEXT NOT NULL, status TEXT NOT NULL,
-            name TEXT NOT NULL, rating INTEGER NOT NULL, text TEXT NOT NULL, itemRef TEXT
-          )
-        `).run();
-        return json({ ok: true });
-      }
-
       if (path === "/api/reviews" && method === "POST") {
         const r = await request.json();
         if (r.website) return json({ ok: true }); // honeypot field — bots fill it, real visitors never see it
