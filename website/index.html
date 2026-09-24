@@ -44,6 +44,10 @@ Vintage icons, modern classics, and jerseys worth remembering. Sourced from the 
 <a class="bg-primary text-pitch-black font-label-sm text-label-sm px-8 py-4 uppercase tracking-widest hover:bg-surface-tint transition-colors text-center border border-primary" href="shop">Shop Jerseys</a>
 <a class="bg-transparent text-primary font-label-sm text-label-sm px-8 py-4 uppercase tracking-widest hover:bg-surface-container-high transition-colors border border-stadium-grey text-center" href="on-hand">See What's On Hand</a>
 </div>
+<a id="home-rating-summary" href="reviews" class="hidden items-center gap-3 mt-2 hover:opacity-80 transition-opacity">
+  <span id="home-rating-stars" class="flex gap-0.5 text-primary"></span>
+  <span id="home-rating-text" class="font-label-sm text-label-sm text-on-surface-variant tracking-widest"></span>
+</a>
 </div>
 <div class="lg:col-span-5 relative mt-12 lg:mt-0 h-[60vh] lg:h-[80vh] w-full group">
 <div class="absolute inset-0 bg-gradient-to-tr from-charcoal-depth to-transparent z-10 pointer-events-none mix-blend-multiply"></div>
@@ -198,6 +202,25 @@ Enter The Shop
     const grid = document.getElementById("home-on-hand-grid");
     const featured = PRODUCTS.filter(p => p.onHand).slice(0, 4);
     grid.innerHTML = featured.map(productCardCompact).join("");
+
+    try {
+      const res = await fetch("/api/reviews");
+      const reviews = res.ok ? await res.json() : [];
+      if (reviews.length) {
+        const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+        const rounded = Math.round(avg);
+        document.getElementById("home-rating-stars").innerHTML = Array.from(
+          { length: 5 },
+          (_, i) => `<span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' ${i < rounded ? 1 : 0}">star</span>`
+        ).join("");
+        document.getElementById("home-rating-text").textContent = `${avg.toFixed(1)} from ${reviews.length} review${reviews.length === 1 ? "" : "s"}`;
+        const el = document.getElementById("home-rating-summary");
+        el.classList.remove("hidden");
+        el.classList.add("flex");
+      }
+    } catch (err) {
+      // Reviews are a nice-to-have on the homepage — fail silently if unreachable.
+    }
   });
 </script>
 </body>

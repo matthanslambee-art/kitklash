@@ -103,7 +103,7 @@ export default {
     try {
       // ---------------- Sitemap ----------------
       if (path === "/sitemap.xml" && method === "GET") {
-        const staticPages = ["", "shop", "on-hand", "about", "request-jersey", "privacy"];
+        const staticPages = ["", "shop", "on-hand", "about", "request-jersey", "privacy", "reviews"];
         const { results } = await env.DB.prepare("SELECT slug FROM products").all();
         const urls = [
           ...staticPages.map(p => `https://kitklash.co.za/${p}`),
@@ -307,6 +307,55 @@ export default {
       if (subEmailMatch && method === "DELETE") {
         if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
         await env.DB.prepare("DELETE FROM subscribers WHERE email = ?").bind(decodeURIComponent(subEmailMatch[1])).run();
+        return json({ ok: true });
+      }
+
+      // ---------------- Reviews ----------------
+      if (path === "/api/admin/init-reviews-table" && method === "POST") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        await env.DB.prepare(`
+          CREATE TABLE IF NOT EXISTS reviews (
+            id TEXT PRIMARY KEY, createdAt TEXT NOT NULL, status TEXT NOT NULL,
+            name TEXT NOT NULL, rating INTEGER NOT NULL, text TEXT NOT NULL, itemRef TEXT
+          )
+        `).run();
+        return json({ ok: true });
+      }
+
+      if (path === "/api/reviews" && method === "POST") {
+        const r = await request.json();
+        if (r.website) return json({ ok: true }); // honeypot field — bots fill it, real visitors never see it
+        const name = (r.name || "").trim();
+        const text = (r.text || "").trim();
+        const rating = Math.round(Number(r.rating));
+        if (!name || !text) return json({ error: "Please fill in your name and review." }, 400);
+        if (!(rating >= 1 && rating <= 5)) return json({ error: "Rating must be between 1 and 5." }, 400);
+        const record = { id: newId("rev"), createdAt: new Date().toISOString(), status: "pending", name, rating, text, itemRef: (r.itemRef || "").trim() };
+        await env.DB.prepare(`
+          INSERT INTO reviews (id, createdAt, status, name, rating, text, itemRef)
+          VALUES (?,?,?,?,?,?,?)
+        `).bind(record.id, record.createdAt, record.status, record.name, record.rating, record.text, record.itemRef).run();
+        return json({ ok: true });
+      }
+
+      if (path === "/api/reviews" && method === "GET") {
+        const admin = await isAdmin(request, env);
+        const { results } = admin
+          ? await env.DB.prepare("SELECT * FROM reviews ORDER BY createdAt DESC").all()
+          : await env.DB.prepare("SELECT * FROM reviews WHERE status = 'approved' ORDER BY createdAt DESC").all();
+        return json(results);
+      }
+
+      const reviewIdMatch = path.match(/^\/api\/reviews\/([^/]+)$/);
+      if (reviewIdMatch && method === "PATCH") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        const { status } = await request.json();
+        await env.DB.prepare("UPDATE reviews SET status = ? WHERE id = ?").bind(status, decodeURIComponent(reviewIdMatch[1])).run();
+        return json({ ok: true });
+      }
+      if (reviewIdMatch && method === "DELETE") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        await env.DB.prepare("DELETE FROM reviews WHERE id = ?").bind(decodeURIComponent(reviewIdMatch[1])).run();
         return json({ ok: true });
       }
 

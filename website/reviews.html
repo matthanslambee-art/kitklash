@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Reviews — KITKLASH</title>
+<meta name="description" content="What customers say about ordering from KITKLASH — read reviews or leave your own."/>
+<link rel="canonical" href="https://kitklash.co.za/reviews"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Reviews — KITKLASH"/>
+<meta property="og:description" content="What customers say about ordering from KITKLASH — read reviews or leave your own."/>
+<meta property="og:url" content="https://kitklash.co.za/reviews"/>
+<meta property="og:image" content="https://kitklash.co.za/assets/img/logo.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Reviews — KITKLASH"/>
+<meta name="twitter:description" content="What customers say about ordering from KITKLASH."/>
+<meta name="twitter:image" content="https://kitklash.co.za/assets/img/logo.png"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/png" href="assets/img/logo.png"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;overflow-x:hidden;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}@media (max-width:640px){.text-display-xl{font-size:42px!important;line-height:46px!important;}.text-headline-lg{font-size:32px!important;line-height:38px!important;}}</style>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="assets/js/tailwind-config.js"></script>
+</head>
+<body class="bg-pitch-black font-body-md text-body-md text-on-surface">
+<div id="site-header"></div>
+<main class="w-full pt-20 bg-pitch-black">
+<div class="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop py-24 flex flex-col gap-16">
+
+<div class="flex flex-col gap-4">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Reviews</span>
+<h1 class="font-display-xl text-display-xl text-primary uppercase tracking-tighter">What Customers Say</h1>
+<div id="rating-summary" class="hidden flex items-center gap-3 mt-2">
+  <div id="rating-summary-stars" class="flex gap-1 text-primary"></div>
+  <span id="rating-summary-text" class="font-body-md text-body-md text-on-surface-variant"></span>
+</div>
+</div>
+
+<div id="reviews-list" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+<p id="reviews-empty" class="hidden font-body-md text-body-md text-on-surface-variant">No reviews yet — be the first to leave one below.</p>
+
+<div class="flex flex-col gap-8 border-t border-stadium-grey pt-16 max-w-xl">
+<h2 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tighter">Leave A Review</h2>
+<p class="font-body-md text-body-md text-on-surface-variant -mt-4">Reviews are checked before they go live, so it won't appear immediately — thanks for your patience.</p>
+
+<form id="review-form" class="flex flex-col gap-8">
+  <input type="text" id="rev-website" name="website" class="hidden" tabindex="-1" autocomplete="off"/>
+
+  <div class="flex flex-col gap-3">
+    <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Your Rating *</label>
+    <div id="star-input" class="flex gap-2 text-3xl">
+      <button type="button" data-star="1" class="star-btn text-stadium-grey hover:text-primary transition-colors">★</button>
+      <button type="button" data-star="2" class="star-btn text-stadium-grey hover:text-primary transition-colors">★</button>
+      <button type="button" data-star="3" class="star-btn text-stadium-grey hover:text-primary transition-colors">★</button>
+      <button type="button" data-star="4" class="star-btn text-stadium-grey hover:text-primary transition-colors">★</button>
+      <button type="button" data-star="5" class="star-btn text-stadium-grey hover:text-primary transition-colors">★</button>
+    </div>
+  </div>
+
+  <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+    <label for="rev-name" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Your Name *</label>
+    <input required id="rev-name" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
+  </div>
+
+  <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+    <label for="rev-item" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Jersey / Order (optional)</label>
+    <input id="rev-item" type="text" placeholder="e.g. Barcelona Home 2026" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
+  </div>
+
+  <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
+    <label for="rev-text" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Your Review *</label>
+    <textarea required id="rev-text" rows="4" class="bg-transparent w-full pb-3 text-primary outline-none resize-none"></textarea>
+  </div>
+
+  <p id="review-error" class="font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest hidden"></p>
+  <p id="review-success" class="font-label-sm text-label-sm text-primary uppercase tracking-widest hidden">Thanks — your review will appear once it's checked.</p>
+
+  <button type="submit" id="review-submit" class="bg-primary text-pitch-black font-label-sm text-label-sm px-8 py-4 uppercase tracking-widest hover:bg-surface-tint transition-colors border border-primary w-fit">Submit Review</button>
+</form>
+</div>
+
+</div>
+</main>
+<div id="site-footer"></div>
+
+<script src="assets/js/products.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  function starsHtml(rating) {
+    return Array.from({ length: 5 }, (_, i) => `<span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' ${i < rating ? 1 : 0}">star</span>`).join("");
+  }
+
+  try {
+    const res = await fetch("/api/reviews");
+    const reviews = res.ok ? await res.json() : [];
+    const listEl = document.getElementById("reviews-list");
+    const emptyEl = document.getElementById("reviews-empty");
+    if (!reviews.length) {
+      emptyEl.classList.remove("hidden");
+    } else {
+      const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+      document.getElementById("rating-summary").classList.remove("hidden");
+      document.getElementById("rating-summary").classList.add("flex");
+      document.getElementById("rating-summary-stars").innerHTML = starsHtml(Math.round(avg));
+      document.getElementById("rating-summary-text").textContent = `${avg.toFixed(1)} average from ${reviews.length} review${reviews.length === 1 ? "" : "s"}`;
+
+      listEl.innerHTML = reviews
+        .map(
+          r => `<div class="border border-stadium-grey p-6 flex flex-col gap-3 bg-charcoal-depth">
+          <div class="flex text-primary">${starsHtml(r.rating)}</div>
+          <p class="font-body-md text-body-md text-on-surface">${r.text}</p>
+          <div class="flex items-center justify-between mt-2">
+            <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest">${r.name}</span>
+            ${r.itemRef ? `<span class="font-label-sm text-label-sm text-outline uppercase tracking-widest">${r.itemRef}</span>` : ""}
+          </div>
+        </div>`
+        )
+        .join("");
+    }
+  } catch (err) {
+    document.getElementById("reviews-empty").classList.remove("hidden");
+  }
+
+  let selectedRating = 0;
+  const starButtons = document.querySelectorAll(".star-btn");
+  function renderStars() {
+    starButtons.forEach(btn => {
+      const on = Number(btn.dataset.star) <= selectedRating;
+      btn.classList.toggle("text-primary", on);
+      btn.classList.toggle("text-stadium-grey", !on);
+    });
+  }
+  starButtons.forEach(btn =>
+    btn.addEventListener("click", () => {
+      selectedRating = Number(btn.dataset.star);
+      renderStars();
+    })
+  );
+
+  document.getElementById("review-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const errorEl = document.getElementById("review-error");
+    const successEl = document.getElementById("review-success");
+    errorEl.classList.add("hidden");
+    successEl.classList.add("hidden");
+
+    const name = document.getElementById("rev-name").value.trim();
+    const text = document.getElementById("rev-text").value.trim();
+    if (!selectedRating) {
+      errorEl.textContent = "Please choose a star rating.";
+      errorEl.classList.remove("hidden");
+      return;
+    }
+    if (!name || !text) {
+      errorEl.textContent = "Please fill in your name and review.";
+      errorEl.classList.remove("hidden");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          text,
+          rating: selectedRating,
+          itemRef: document.getElementById("rev-item").value.trim(),
+          website: document.getElementById("rev-website").value
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Something went wrong — try again.");
+      successEl.classList.remove("hidden");
+      document.getElementById("review-form").reset();
+      selectedRating = 0;
+      renderStars();
+    } catch (err) {
+      errorEl.textContent = err.message || "Something went wrong — try again.";
+      errorEl.classList.remove("hidden");
+    }
+  });
+});
+</script>
+</body>
+</html>

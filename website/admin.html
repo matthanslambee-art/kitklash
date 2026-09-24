@@ -64,6 +64,7 @@
       <button id="tab-btn-requests" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Jersey Requests <span id="requests-badge" class="ml-1 px-2 py-0.5 rounded-full bg-kit-accent-red text-primary text-[10px] hidden"></span></button>
       <button id="tab-btn-orders" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Orders <span id="orders-badge" class="ml-1 px-2 py-0.5 rounded-full bg-kit-accent-red text-primary text-[10px] hidden"></span></button>
       <button id="tab-btn-subscribers" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Newsletter</button>
+      <button id="tab-btn-reviews" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Reviews <span id="reviews-badge" class="ml-1 px-2 py-0.5 rounded-full bg-kit-accent-red text-primary text-[10px] hidden"></span></button>
     </div>
 
     <div id="products-view" class="flex flex-col gap-8">
@@ -272,6 +273,42 @@
             </tr>
           </thead>
           <tbody id="subscribers-table-body" class="divide-y divide-stadium-grey text-sm">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Reviews View -->
+    <div id="reviews-view" class="hidden flex-col gap-8">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="bg-charcoal-depth border border-stadium-grey p-5 rounded-sm flex flex-col gap-1">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Total</span>
+          <span class="font-display-xl text-3xl text-primary" id="stat-reviews-total">0</span>
+        </div>
+        <div class="bg-charcoal-depth border border-stadium-grey p-5 rounded-sm flex flex-col gap-1">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Pending</span>
+          <span class="font-display-xl text-3xl text-kit-accent-red" id="stat-reviews-pending">0</span>
+        </div>
+        <div class="bg-charcoal-depth border border-stadium-grey p-5 rounded-sm flex flex-col gap-1">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Approved</span>
+          <span class="font-display-xl text-3xl text-primary" id="stat-reviews-approved">0</span>
+        </div>
+      </div>
+      <div class="bg-charcoal-depth border border-stadium-grey rounded-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stadium-grey bg-pitch-black/50 text-xs text-outline uppercase tracking-widest font-label-sm">
+              <th class="p-4">Received</th>
+              <th class="p-4">Name</th>
+              <th class="p-4">Rating</th>
+              <th class="p-4">Review</th>
+              <th class="p-4">Item</th>
+              <th class="p-4">Status</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reviews-table-body" class="divide-y divide-stadium-grey text-sm">
             <!-- Populated by JS -->
           </tbody>
         </table>
@@ -626,12 +663,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   await renderAdminTable();
   await renderRequestsTable();
   await renderOrdersTable();
+  await renderReviewsTable();
 
   // Tab switching
   document.getElementById("tab-btn-products")?.addEventListener("click", () => switchAdminTab("products"));
   document.getElementById("tab-btn-requests")?.addEventListener("click", () => switchAdminTab("requests"));
   document.getElementById("tab-btn-orders")?.addEventListener("click", () => switchAdminTab("orders"));
   document.getElementById("tab-btn-subscribers")?.addEventListener("click", () => switchAdminTab("subscribers"));
+  document.getElementById("tab-btn-reviews")?.addEventListener("click", () => switchAdminTab("reviews"));
 
   // Search and Filter Listeners
   document.getElementById("admin-search")?.addEventListener("input", renderAdminTable);
@@ -700,7 +739,8 @@ async function switchAdminTab(tab) {
     products: { btn: document.getElementById("tab-btn-products"), view: document.getElementById("products-view") },
     requests: { btn: document.getElementById("tab-btn-requests"), view: document.getElementById("requests-view") },
     orders: { btn: document.getElementById("tab-btn-orders"), view: document.getElementById("orders-view") },
-    subscribers: { btn: document.getElementById("tab-btn-subscribers"), view: document.getElementById("subscribers-view") }
+    subscribers: { btn: document.getElementById("tab-btn-subscribers"), view: document.getElementById("subscribers-view") },
+    reviews: { btn: document.getElementById("tab-btn-reviews"), view: document.getElementById("reviews-view") }
   };
 
   const active = "text-primary border-primary";
@@ -716,6 +756,7 @@ async function switchAdminTab(tab) {
   if (tab === "requests") await renderRequestsTable();
   if (tab === "orders") await renderOrdersTable();
   if (tab === "subscribers") await renderSubscribersTable();
+  if (tab === "reviews") await renderReviewsTable();
 }
 
 async function renderSubscribersTable() {
@@ -747,6 +788,77 @@ async function confirmDeleteSubscriber(email) {
   if (confirm(`Remove ${email} from the newsletter list?`)) {
     await fetch(`/api/subscribers/${encodeURIComponent(email)}`, { method: "DELETE", headers: { "X-Admin-Key": getAdminKey() } });
     await renderSubscribersTable();
+  }
+}
+
+async function renderReviewsTable() {
+  const res = await fetch("/api/reviews", { headers: { "X-Admin-Key": getAdminKey() } });
+  const items = res.ok ? await res.json() : [];
+
+  document.getElementById("stat-reviews-total").textContent = items.length;
+  const pending = items.filter(r => r.status === "pending");
+  document.getElementById("stat-reviews-pending").textContent = pending.length;
+  document.getElementById("stat-reviews-approved").textContent = items.filter(r => r.status === "approved").length;
+
+  const badge = document.getElementById("reviews-badge");
+  if (pending.length > 0) {
+    badge.textContent = pending.length;
+    badge.classList.remove("hidden");
+  } else {
+    badge.classList.add("hidden");
+  }
+
+  const tbody = document.getElementById("reviews-table-body");
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-outline">No reviews submitted yet.</td></tr>`;
+    return;
+  }
+
+  const statusStyles = {
+    pending: "bg-kit-accent-red/20 text-kit-accent-red border-kit-accent-red/40",
+    approved: "bg-green-500/20 text-green-400 border-green-500/40",
+    rejected: "bg-pitch-black/50 text-outline border-stadium-grey"
+  };
+
+  tbody.innerHTML = items
+    .map(r => {
+      const date = new Date(r.createdAt);
+      return `<tr class="hover:bg-pitch-black/40 transition-colors align-top">
+      <td class="p-4 text-xs text-outline whitespace-nowrap">${date.toLocaleDateString()}</td>
+      <td class="p-4 text-primary font-bold">${r.name}</td>
+      <td class="p-4 font-mono text-primary whitespace-nowrap">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</td>
+      <td class="p-4 text-xs text-on-surface-variant max-w-xs">${r.text}</td>
+      <td class="p-4 text-xs text-outline">${r.itemRef || "—"}</td>
+      <td class="p-4">
+        <select onchange="handleReviewStatusChange('${r.id}', this.value)" class="px-2 py-1 rounded-sm text-xs font-mono uppercase border bg-pitch-black outline-none ${statusStyles[r.status] || statusStyles.pending}">
+          <option value="pending" ${r.status === "pending" ? "selected" : ""}>Pending</option>
+          <option value="approved" ${r.status === "approved" ? "selected" : ""}>Approved</option>
+          <option value="rejected" ${r.status === "rejected" ? "selected" : ""}>Rejected</option>
+        </select>
+      </td>
+      <td class="p-4 text-right">
+        <button onclick="confirmDeleteReview('${r.id}')" class="p-1.5 text-on-surface-variant hover:text-kit-accent-red border border-stadium-grey rounded-sm transition-colors" title="Delete Review">
+          <span class="material-symbols-outlined text-[18px]">delete</span>
+        </button>
+      </td>
+    </tr>`;
+    })
+    .join("");
+}
+
+async function handleReviewStatusChange(id, status) {
+  await fetch(`/api/reviews/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", "X-Admin-Key": getAdminKey() },
+    body: JSON.stringify({ status })
+  });
+  await renderReviewsTable();
+}
+
+async function confirmDeleteReview(id) {
+  if (confirm("Delete this review permanently?")) {
+    await fetch(`/api/reviews/${encodeURIComponent(id)}`, { method: "DELETE", headers: { "X-Admin-Key": getAdminKey() } });
+    await renderReviewsTable();
   }
 }
 
