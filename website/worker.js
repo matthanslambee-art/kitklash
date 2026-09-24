@@ -290,7 +290,10 @@ export default {
       if (path === "/api/subscribe" && method === "POST") {
         const { email } = await request.json();
         const clean = (email || "").trim().toLowerCase();
-        if (!clean || !clean.includes("@")) return json({ error: "Enter a valid email address." }, 400);
+        // Deliberately strict (rejects quotes/angle brackets, not just "has an @") — this value
+        // gets rendered inside an admin onclick attribute, so a loose check here would leave a
+        // second, attribute-context injection path open even after the display-side HTML escaping.
+        if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(clean)) return json({ error: "Enter a valid email address." }, 400);
         await env.DB.prepare("INSERT INTO subscribers (email, createdAt) VALUES (?, ?) ON CONFLICT(email) DO NOTHING")
           .bind(clean, new Date().toISOString())
           .run();

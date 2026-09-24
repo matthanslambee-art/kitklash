@@ -108,10 +108,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         .map(
           r => `<div class="border border-stadium-grey p-6 flex flex-col gap-3 bg-charcoal-depth">
           <div class="flex text-primary">${starsHtml(r.rating)}</div>
-          <p class="font-body-md text-body-md text-on-surface">${r.text}</p>
+          <p class="font-body-md text-body-md text-on-surface">${escapeHtml(r.text)}</p>
           <div class="flex items-center justify-between mt-2">
-            <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest">${r.name}</span>
-            ${r.itemRef ? `<span class="font-label-sm text-label-sm text-outline uppercase tracking-widest">${r.itemRef}</span>` : ""}
+            <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest">${escapeHtml(r.name)}</span>
+            ${r.itemRef ? `<span class="font-label-sm text-label-sm text-outline uppercase tracking-widest">${escapeHtml(r.itemRef)}</span>` : ""}
           </div>
         </div>`
         )

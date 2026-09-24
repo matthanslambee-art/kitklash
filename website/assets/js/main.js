@@ -7,6 +7,22 @@ function formatPrice(n) {
   return "R" + n.toLocaleString("en-ZA");
 }
 
+/* Escapes text before it's interpolated into an innerHTML template literal.
+   Required for anything a member of the public typed themselves (review
+   text, jersey requests, checkout/order details, newsletter emails) before
+   it's ever rendered back — without this, a submitted name or note like
+   "<img src=x onerror=...>" would execute as real script in whichever
+   browser later renders it (a customer's, or the admin's). */
+function escapeHtml(value) {
+  if (value === null || value === undefined) return "";
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /* The admin gate (admin.html) stores the entered password here after a
    successful login; every admin-only API call sends it as the X-Admin-Key
    header, which the Worker checks server-side. Empty string on any page

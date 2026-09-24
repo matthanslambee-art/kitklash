@@ -628,26 +628,39 @@
 <script src="assets/js/orders.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
-/* The gate itself is still just a client-side UI hide — the real enforcement
-   now happens server-side in website/worker.js, which checks this same value
-   (sent as the X-Admin-Key header) against the ADMIN_KEY secret before
-   allowing any write. A wrong/missing key here just means every admin API
-   call gets rejected with 401, not that the data is actually reachable. */
-const ADMIN_PASSWORD = "ASlambee07";
-
 function unlockAdmin() {
   document.getElementById("admin-gate").classList.add("hidden");
   document.getElementById("admin-main").classList.remove("hidden");
 }
 
-if (getAdminKey() === ADMIN_PASSWORD) {
-  unlockAdmin();
+/* The real admin key must never be written into this file — this is a public
+   page, and anyone can view its source. Instead, a candidate key is checked
+   by actually calling an admin-protected endpoint and seeing whether the
+   server accepts it (401 means wrong/missing key). This is the only place
+   that decides who gets in; there is no local copy of the real key to leak. */
+async function verifyAdminKey(key) {
+  if (!key) return false;
+  try {
+    const res = await fetch("/api/orders", { headers: { "X-Admin-Key": key } });
+    return res.status !== 401;
+  } catch (err) {
+    return false;
+  }
 }
 
-document.getElementById("admin-gate-form").addEventListener("submit", e => {
+(async () => {
+  const stored = getAdminKey();
+  if (stored && (await verifyAdminKey(stored))) unlockAdmin();
+})();
+
+document.getElementById("admin-gate-form").addEventListener("submit", async e => {
   e.preventDefault();
   const input = document.getElementById("admin-gate-password");
-  if (input.value === ADMIN_PASSWORD) {
+  const submitBtn = document.getElementById("admin-gate-form").querySelector("button[type=submit]");
+  submitBtn.disabled = true;
+  const ok = await verifyAdminKey(input.value);
+  submitBtn.disabled = false;
+  if (ok) {
     sessionStorage.setItem("kitklash_admin_key", input.value);
     unlockAdmin();
   } else {
@@ -771,7 +784,7 @@ async function renderSubscribersTable() {
     .map(s => {
       const date = new Date(s.createdAt);
       return `<tr class="hover:bg-pitch-black/40 transition-colors">
-      <td class="p-4 text-primary">${s.email}</td>
+      <td class="p-4 text-primary">${escapeHtml(s.email)}</td>
       <td class="p-4 text-xs text-outline whitespace-nowrap">${date.toLocaleDateString()}</td>
       <td class="p-4 text-right">
         <button onclick="confirmDeleteSubscriber('${s.email}')" class="p-1.5 text-on-surface-variant hover:text-kit-accent-red border border-stadium-grey rounded-sm transition-colors" title="Remove">
@@ -824,10 +837,10 @@ async function renderReviewsTable() {
       const date = new Date(r.createdAt);
       return `<tr class="hover:bg-pitch-black/40 transition-colors align-top">
       <td class="p-4 text-xs text-outline whitespace-nowrap">${date.toLocaleDateString()}</td>
-      <td class="p-4 text-primary font-bold">${r.name}</td>
+      <td class="p-4 text-primary font-bold">${escapeHtml(r.name)}</td>
       <td class="p-4 font-mono text-primary whitespace-nowrap">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</td>
-      <td class="p-4 text-xs text-on-surface-variant max-w-xs">${r.text}</td>
-      <td class="p-4 text-xs text-outline">${r.itemRef || "—"}</td>
+      <td class="p-4 text-xs text-on-surface-variant max-w-xs">${escapeHtml(r.text)}</td>
+      <td class="p-4 text-xs text-outline">${escapeHtml(r.itemRef) || "—"}</td>
       <td class="p-4">
         <select onchange="handleReviewStatusChange('${r.id}', this.value)" class="px-2 py-1 rounded-sm text-xs font-mono uppercase border bg-pitch-black outline-none ${statusStyles[r.status] || statusStyles.pending}">
           <option value="pending" ${r.status === "pending" ? "selected" : ""}>Pending</option>
@@ -912,15 +925,15 @@ async function renderRequestsTable() {
     <tr class="hover:bg-pitch-black/40 transition-colors align-top">
       <td class="p-4 text-xs text-outline whitespace-nowrap">${date.toLocaleDateString()}<br/>${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
       <td class="p-4">
-        <div class="text-primary font-bold">${r.firstName} ${r.surname}</div>
-        <div class="text-xs text-outline">${r.email}</div>
-        ${r.contact ? `<div class="text-xs text-outline">${r.contact}</div>` : ""}
+        <div class="text-primary font-bold">${escapeHtml(r.firstName)} ${escapeHtml(r.surname)}</div>
+        <div class="text-xs text-outline">${escapeHtml(r.email)}</div>
+        ${r.contact ? `<div class="text-xs text-outline">${escapeHtml(r.contact)}</div>` : ""}
       </td>
       <td class="p-4">
-        <div class="text-primary uppercase tracking-wide text-xs">${r.team}</div>
-        <div class="text-xs text-outline">${r.year ? "Year: " + r.year : ""}${r.year && r.size ? " · " : ""}${r.size ? "Size: " + r.size : ""}</div>
+        <div class="text-primary uppercase tracking-wide text-xs">${escapeHtml(r.team)}</div>
+        <div class="text-xs text-outline">${r.year ? "Year: " + escapeHtml(r.year) : ""}${r.year && r.size ? " · " : ""}${r.size ? "Size: " + escapeHtml(r.size) : ""}</div>
       </td>
-      <td class="p-4 text-xs text-on-surface-variant max-w-xs">${r.notes || "—"}</td>
+      <td class="p-4 text-xs text-on-surface-variant max-w-xs">${r.notes ? escapeHtml(r.notes) : "—"}</td>
       <td class="p-4">
         <select onchange="handleRequestStatusChange('${r.id}', this.value)" class="px-2 py-1 rounded-sm text-xs font-mono uppercase border bg-pitch-black outline-none ${statusStyles[r.status] || statusStyles.new}">
           <option value="new" ${r.status === "new" ? "selected" : ""}>New</option>
@@ -997,13 +1010,13 @@ async function renderOrdersTable() {
     <tr class="hover:bg-pitch-black/40 transition-colors align-top">
       <td class="p-4 text-xs text-outline whitespace-nowrap">${date.toLocaleDateString()}<br/>${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
       <td class="p-4">
-        <div class="text-primary font-bold">${o.firstName} ${o.surname}</div>
-        <div class="text-xs text-outline">${o.email}</div>
-        ${o.phone ? `<div class="text-xs text-outline">${o.phone}</div>` : ""}
+        <div class="text-primary font-bold">${escapeHtml(o.firstName)} ${escapeHtml(o.surname)}</div>
+        <div class="text-xs text-outline">${escapeHtml(o.email)}</div>
+        ${o.phone ? `<div class="text-xs text-outline">${escapeHtml(o.phone)}</div>` : ""}
       </td>
-      <td class="p-4 text-xs text-on-surface-variant max-w-xs">${(o.items || []).join("<br/>")}</td>
-      <td class="p-4 text-xs text-on-surface-variant max-w-xs">${o.address || "—"}</td>
-      <td class="p-4 font-mono font-bold text-primary whitespace-nowrap">${o.total || "—"}</td>
+      <td class="p-4 text-xs text-on-surface-variant max-w-xs">${(o.items || []).map(escapeHtml).join("<br/>")}</td>
+      <td class="p-4 text-xs text-on-surface-variant max-w-xs">${o.address ? escapeHtml(o.address) : "—"}</td>
+      <td class="p-4 font-mono font-bold text-primary whitespace-nowrap">${o.total ? escapeHtml(o.total) : "—"}</td>
       <td class="p-4">
         <select onchange="handleOrderStatusChange('${o.id}', this.value)" class="px-2 py-1 rounded-sm text-xs font-mono uppercase border bg-pitch-black outline-none ${statusStyles[o.status] || statusStyles.new}">
           <option value="new" ${o.status === "new" ? "selected" : ""}>New</option>
