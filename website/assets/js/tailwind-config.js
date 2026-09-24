@@ -30,7 +30,7 @@ tailwind.config = {
         "outline-variant": "#444748",
         "inverse-surface": "#e2e2e2",
         "on-primary-fixed-variant": "#454747",
-        "kit-accent-red": "#DA0000",
+        "kit-accent-red": "#EF4444",
         "secondary-fixed": "#e3e2e2",
         "surface-dim": "#131313",
         "surface-container": "#1f1f1f",

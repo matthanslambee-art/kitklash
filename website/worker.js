@@ -103,7 +103,7 @@ export default {
     try {
       // ---------------- Sitemap ----------------
       if (path === "/sitemap.xml" && method === "GET") {
-        const staticPages = ["", "shop", "on-hand", "about", "request-jersey"];
+        const staticPages = ["", "shop", "on-hand", "about", "request-jersey", "privacy"];
         const { results } = await env.DB.prepare("SELECT slug FROM products").all();
         const urls = [
           ...staticPages.map(p => `https://kitklash.co.za/${p}`),

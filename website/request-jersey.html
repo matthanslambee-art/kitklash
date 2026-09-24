@@ -42,19 +42,19 @@
 <form id="request-form" class="flex flex-col gap-10">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
     <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">First Name *</label>
+      <label for="rf-firstName" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">First Name *</label>
       <input required id="rf-firstName" type="text" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
     </div>
     <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Surname *</label>
+      <label for="rf-surname" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Surname *</label>
       <input required id="rf-surname" type="text" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
     </div>
     <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Email *</label>
+      <label for="rf-email" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Email *</label>
       <input required id="rf-email" type="email" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
     </div>
     <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">WhatsApp / Contact Number</label>
+      <label for="rf-contact" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">WhatsApp / Contact Number</label>
       <input id="rf-contact" type="text" placeholder="Optional" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
     </div>
   </div>
@@ -63,15 +63,15 @@
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-10">
     <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors md:col-span-2">
-      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Team You're Looking For *</label>
+      <label for="rf-team" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Team You're Looking For *</label>
       <input required id="rf-team" type="text" placeholder="e.g. FC Barcelona" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
     </div>
     <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Year</label>
+      <label for="rf-year" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Year</label>
       <input id="rf-year" type="text" placeholder="e.g. 1999" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
     </div>
     <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-      <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Size</label>
+      <label for="rf-size" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Size</label>
       <select id="rf-size" class="bg-pitch-black w-full pb-3 text-primary outline-none cursor-pointer">
         <option value="">Select size</option>
         <option value="S">S</option>
@@ -84,7 +84,7 @@
   </div>
 
   <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-    <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Special Notes</label>
+    <label for="rf-notes" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Special Notes</label>
     <p class="font-label-sm text-label-sm text-outline mb-3 normal-case tracking-normal">Custom name+number or patches</p>
     <textarea id="rf-notes" rows="3" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline resize-none"></textarea>
   </div>

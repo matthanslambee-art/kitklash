@@ -238,7 +238,7 @@ function removeFromCart(index) {
 }
 
 function cartCount() {
-  return getCart().reduce((n, i) => n + i.qty, 0);
+  return getCart().reduce((n, i) => (getProductBySlug(i.slug) ? n + i.qty : n), 0);
 }
 
 function cartSubtotal() {

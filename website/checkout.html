@@ -35,19 +35,19 @@
       <h2 class="font-label-sm text-label-sm text-primary uppercase tracking-widest border-b border-stadium-grey pb-4">Contact</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
         <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">First Name *</label>
+          <label for="co-firstName" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">First Name *</label>
           <input required id="co-firstName" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
         </div>
         <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Surname *</label>
+          <label for="co-surname" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Surname *</label>
           <input required id="co-surname" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
         </div>
         <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Email *</label>
+          <label for="co-email" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Email *</label>
           <input required id="co-email" type="email" class="bg-transparent w-full pb-3 text-primary outline-none"/>
         </div>
         <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Phone / WhatsApp</label>
+          <label for="co-phone" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Phone / WhatsApp</label>
           <input id="co-phone" type="text" placeholder="Optional" class="bg-transparent w-full pb-3 text-primary outline-none placeholder:text-outline"/>
         </div>
       </div>
@@ -57,20 +57,20 @@
       <h2 class="font-label-sm text-label-sm text-primary uppercase tracking-widest border-b border-stadium-grey pb-4">Delivery Address</h2>
       <div class="grid grid-cols-1 gap-8">
         <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Street Address *</label>
+          <label for="co-address" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Street Address *</label>
           <input required id="co-address" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-8">
           <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-            <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">City *</label>
+            <label for="co-city" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">City *</label>
             <input required id="co-city" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
           </div>
           <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-            <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Postal Code *</label>
+            <label for="co-postal" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Postal Code *</label>
             <input required id="co-postal" type="text" class="bg-transparent w-full pb-3 text-primary outline-none"/>
           </div>
           <div class="flex flex-col border-b border-stadium-grey focus-within:border-primary transition-colors">
-            <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Country *</label>
+            <label for="co-country" class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Country *</label>
             <input required id="co-country" type="text" value="South Africa" class="bg-transparent w-full pb-3 text-primary outline-none"/>
           </div>
         </div>
@@ -86,6 +86,7 @@
         <span class="material-symbols-outlined text-[16px]">lock</span>
         <p class="font-label-sm text-label-sm text-[10px] uppercase tracking-widest text-center">Secured by Yoco &middot; Visa, Mastercard, Apple Pay &amp; Google Pay accepted</p>
       </div>
+      <p class="font-label-sm text-label-sm text-outline text-[10px] uppercase tracking-widest text-center">By placing this order you agree to our <a href="privacy" class="underline hover:text-primary">Privacy &amp; Terms</a>.</p>
     </div>
   </form>
 

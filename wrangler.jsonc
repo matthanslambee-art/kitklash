@@ -9,7 +9,8 @@
   "assets": {
     "directory": "website",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*", "/sitemap.xml", "/uploads/*"]
+    "run_worker_first": ["/api/*", "/sitemap.xml", "/uploads/*"],
+    "not_found_handling": "404-page"
   },
   "d1_databases": [
     {
