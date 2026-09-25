@@ -78,7 +78,7 @@
 
     <div class="flex flex-col gap-4">
       <button type="submit" id="checkout-submit" class="bg-primary text-pitch-black font-label-sm text-label-sm px-8 py-5 uppercase tracking-widest hover:bg-surface-tint transition-colors border border-primary w-full flex items-center justify-center gap-2">
-        <span id="checkout-submit-label">Proceed to Payment</span>
+        <span id="checkout-submit-label">Review Order</span>
       </button>
       <p id="checkout-error" class="font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest hidden"></p>
       <div class="flex items-center justify-center gap-2 text-outline">
@@ -132,6 +132,47 @@
 </main>
 <div id="site-footer"></div>
 
+<!-- Review Order Modal -->
+<div id="review-modal" class="fixed inset-0 z-[100] bg-pitch-black/80 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-charcoal-depth border border-stadium-grey w-full max-w-lg rounded-sm shadow-2xl my-8 overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="px-6 py-4 border-b border-stadium-grey flex items-center justify-between bg-pitch-black/50 shrink-0">
+      <h3 class="font-display-xl text-xl text-primary uppercase">Review Your Order</h3>
+      <button type="button" id="review-modal-close-btn" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="p-6 overflow-y-auto flex flex-col gap-6">
+      <div id="review-items" class="flex flex-col gap-6"></div>
+      <hr class="border-t border-stadium-grey"/>
+      <div class="flex flex-col gap-2">
+        <div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+          <span>Subtotal</span><span id="review-subtotal">R0</span>
+        </div>
+        <div id="review-discount-row" class="hidden justify-between font-label-sm text-label-sm text-primary uppercase tracking-widest">
+          <span id="review-discount-label">Discount</span><span id="review-discount-amount">-R0</span>
+        </div>
+        <div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+          <span>Shipping (Nationwide)</span><span>R100</span>
+        </div>
+      </div>
+      <hr class="border-t border-stadium-grey"/>
+      <div class="flex justify-between font-label-sm text-label-sm text-primary uppercase tracking-widest">
+        <span>Total</span><span id="review-total">R0</span>
+      </div>
+      <hr class="border-t border-stadium-grey"/>
+      <div class="flex flex-col gap-1">
+        <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Delivering To</span>
+        <p id="review-customer" class="font-body-md text-body-md text-on-surface-variant"></p>
+      </div>
+    </div>
+    <div class="p-6 border-t border-stadium-grey flex flex-col gap-3 shrink-0">
+      <button type="button" id="review-pay-btn" class="bg-primary text-pitch-black font-label-sm text-label-sm px-8 py-5 uppercase tracking-widest hover:bg-surface-tint transition-colors border border-primary w-full flex items-center justify-center gap-2">
+        <span id="review-pay-label">Pay Now</span>
+      </button>
+      <button type="button" id="review-edit-btn" class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary uppercase tracking-widest text-center py-2">Edit Order</button>
+      <p id="review-error" class="font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest hidden text-center"></p>
+    </div>
+  </div>
+</div>
+
 <script src="assets/js/products.js"></script>
 <script src="assets/js/orders.js"></script>
 <script src="assets/js/main.js"></script>
@@ -143,18 +184,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const form = document.getElementById("checkout-form");
   const errorEl = document.getElementById("checkout-error");
   const submitBtn = document.getElementById("checkout-submit");
-  const submitLabel = document.getElementById("checkout-submit-label");
 
   if (new URLSearchParams(location.search).get("payment") === "failed") {
     document.getElementById("payment-failed-banner").classList.remove("hidden");
   }
 
-  if (!cart.length) {
-    itemsHost.innerHTML = `<p class="font-body-md text-body-md text-on-surface-variant">Your bag is empty.</p>`;
-    submitBtn.disabled = true;
-    submitBtn.classList.add("opacity-30", "cursor-not-allowed");
-  } else {
-    itemsHost.innerHTML = cart
+  function cartItemsHtml() {
+    return cart
       .map(item => {
         const p = getProductBySlug(item.slug);
         if (!p) return "";
@@ -173,6 +209,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>`;
       })
       .join("");
+  }
+
+  if (!cart.length) {
+    itemsHost.innerHTML = `<p class="font-body-md text-body-md text-on-surface-variant">Your bag is empty.</p>`;
+    submitBtn.disabled = true;
+    submitBtn.classList.add("opacity-30", "cursor-not-allowed");
+  } else {
+    itemsHost.innerHTML = cartItemsHtml();
   }
   const SHIPPING_FLAT = 100;
   let appliedDiscount = null;
@@ -219,7 +263,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  form.addEventListener("submit", async e => {
+  const reviewModal = document.getElementById("review-modal");
+  const reviewPayBtn = document.getElementById("review-pay-btn");
+  const reviewPayLabel = document.getElementById("review-pay-label");
+  const reviewErrorEl = document.getElementById("review-error");
+  let pendingCustomer = null;
+
+  function openReviewModal(customer) {
+    document.getElementById("review-items").innerHTML = cartItemsHtml();
+    document.getElementById("review-subtotal").textContent = formatPrice(cartSubtotal());
+    const discountRow = document.getElementById("review-discount-row");
+    if (appliedDiscount) {
+      document.getElementById("review-discount-label").textContent = `Discount (${appliedDiscount.code})`;
+      document.getElementById("review-discount-amount").textContent = `-${formatPrice(appliedDiscount.discountAmount)}`;
+      discountRow.classList.remove("hidden");
+      discountRow.classList.add("flex");
+    } else {
+      discountRow.classList.add("hidden");
+      discountRow.classList.remove("flex");
+    }
+    document.getElementById("review-total").textContent = document.getElementById("checkout-total").textContent;
+    document.getElementById("review-customer").textContent =
+      `${customer.firstName} ${customer.surname} — ${customer.address}${customer.phone ? " — " + customer.phone : ""} — ${customer.email}`;
+    reviewErrorEl.classList.add("hidden");
+    reviewModal.classList.remove("hidden");
+    reviewModal.classList.add("flex");
+  }
+
+  function closeReviewModal() {
+    reviewModal.classList.add("hidden");
+    reviewModal.classList.remove("flex");
+  }
+
+  document.getElementById("review-modal-close-btn").addEventListener("click", closeReviewModal);
+  document.getElementById("review-edit-btn").addEventListener("click", closeReviewModal);
+  reviewModal.addEventListener("click", e => {
+    if (e.target === reviewModal) closeReviewModal();
+  });
+
+  form.addEventListener("submit", e => {
     e.preventDefault();
     if (!cart.length) return;
     errorEl.classList.add("hidden");
@@ -245,22 +327,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    submitBtn.disabled = true;
-    submitLabel.textContent = "Redirecting to Payment…";
+    pendingCustomer = customer;
+    openReviewModal(customer);
+  });
+
+  reviewPayBtn.addEventListener("click", async () => {
+    if (!pendingCustomer) return;
+    reviewErrorEl.classList.add("hidden");
+    reviewPayBtn.disabled = true;
+    reviewPayLabel.textContent = "Redirecting to Payment…";
 
     try {
       // The server looks up each item's real price and builds the order total
       // itself from `cart` — it never trusts a client-computed total/description
       // or discount amount; only the discount CODE is passed through, and the
       // server re-validates and recomputes the discount itself.
-      const order = await saveNewOrder({ ...customer, items: cart, discountCode: appliedDiscount ? appliedDiscount.code : undefined });
+      const order = await saveNewOrder({ ...pendingCustomer, items: cart, discountCode: appliedDiscount ? appliedDiscount.code : undefined });
       const { redirectUrl } = await createYocoCheckout(order.id);
       window.location.href = redirectUrl;
     } catch (err) {
-      errorEl.textContent = err.message || "Something went wrong starting payment. Please try again.";
-      errorEl.classList.remove("hidden");
-      submitBtn.disabled = false;
-      submitLabel.textContent = "Proceed to Payment";
+      reviewErrorEl.textContent = err.message || "Something went wrong starting payment. Please try again.";
+      reviewErrorEl.classList.remove("hidden");
+      reviewPayBtn.disabled = false;
+      reviewPayLabel.textContent = "Pay Now";
     }
   });
 });
