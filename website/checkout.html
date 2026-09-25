@@ -142,6 +142,14 @@
     <div class="p-6 overflow-y-auto flex flex-col gap-6">
       <div id="review-items" class="flex flex-col gap-6"></div>
       <hr class="border-t border-stadium-grey"/>
+      <div class="flex flex-col gap-3">
+        <div class="flex gap-2">
+          <input id="review-discount-code" type="text" placeholder="Discount code" class="flex-1 min-w-0 bg-transparent border-b border-stadium-grey focus:border-primary outline-none py-2 text-sm text-primary uppercase placeholder:text-outline placeholder:normal-case"/>
+          <button type="button" id="review-discount-apply" class="px-4 py-2 border border-stadium-grey text-primary hover:border-primary font-label-sm text-label-sm uppercase tracking-widest transition-colors shrink-0">Apply</button>
+        </div>
+        <p id="review-discount-error" class="font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest hidden"></p>
+      </div>
+      <hr class="border-t border-stadium-grey"/>
       <div class="flex flex-col gap-2">
         <div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
           <span>Subtotal</span><span id="review-subtotal">R0</span>
@@ -223,28 +231,69 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function updateTotals() {
     const subtotal = cartSubtotal();
-    const discountRow = document.getElementById("checkout-discount-row");
     const discountAmount = appliedDiscount ? appliedDiscount.discountAmount : 0;
+    const finalTotal = Math.max(0, subtotal - discountAmount) + SHIPPING_FLAT;
+
+    // Checkout Sidebar
     document.getElementById("checkout-subtotal").textContent = formatPrice(subtotal);
+    const checkoutDiscountRow = document.getElementById("checkout-discount-row");
     if (appliedDiscount) {
       document.getElementById("checkout-discount-label").textContent = `Discount (${appliedDiscount.code})`;
       document.getElementById("checkout-discount-amount").textContent = `-${formatPrice(discountAmount)}`;
-      discountRow.classList.remove("hidden");
-      discountRow.classList.add("flex");
+      checkoutDiscountRow.classList.remove("hidden");
+      checkoutDiscountRow.classList.add("flex");
     } else {
-      discountRow.classList.add("hidden");
-      discountRow.classList.remove("flex");
+      checkoutDiscountRow.classList.add("hidden");
+      checkoutDiscountRow.classList.remove("flex");
     }
-    document.getElementById("checkout-total").textContent = formatPrice(Math.max(0, subtotal - discountAmount) + SHIPPING_FLAT);
+    document.getElementById("checkout-total").textContent = formatPrice(finalTotal);
+
+    // Review Modal
+    const reviewSubtotal = document.getElementById("review-subtotal");
+    if (reviewSubtotal) reviewSubtotal.textContent = formatPrice(subtotal);
+
+    const reviewDiscountRow = document.getElementById("review-discount-row");
+    if (reviewDiscountRow) {
+      if (appliedDiscount) {
+        document.getElementById("review-discount-label").textContent = `Discount (${appliedDiscount.code})`;
+        document.getElementById("review-discount-amount").textContent = `-${formatPrice(discountAmount)}`;
+        reviewDiscountRow.classList.remove("hidden");
+        reviewDiscountRow.classList.add("flex");
+      } else {
+        reviewDiscountRow.classList.add("hidden");
+        reviewDiscountRow.classList.remove("flex");
+      }
+    }
+
+    const reviewTotal = document.getElementById("review-total");
+    if (reviewTotal) reviewTotal.textContent = formatPrice(finalTotal);
   }
   updateTotals();
 
-  document.getElementById("checkout-discount-apply").addEventListener("click", async () => {
-    const codeInput = document.getElementById("checkout-discount-code");
-    const discountErrorEl = document.getElementById("checkout-discount-error");
-    const code = codeInput.value.trim();
-    discountErrorEl.classList.add("hidden");
-    if (!code) return;
+  async function applyDiscountCode(codeVal, errorTargetEl, applyBtn) {
+    const code = (codeVal || "").trim();
+    if (errorTargetEl) errorTargetEl.classList.add("hidden");
+    const checkoutErr = document.getElementById("checkout-discount-error");
+    if (checkoutErr) checkoutErr.classList.add("hidden");
+    const revErr = document.getElementById("review-discount-error");
+    if (revErr) revErr.classList.add("hidden");
+
+    if (!code) {
+      appliedDiscount = null;
+      const coCode = document.getElementById("checkout-discount-code");
+      if (coCode) coCode.value = "";
+      const revCode = document.getElementById("review-discount-code");
+      if (revCode) revCode.value = "";
+      updateTotals();
+      return;
+    }
+
+    const origText = applyBtn ? applyBtn.textContent : "Apply";
+    if (applyBtn) {
+      applyBtn.disabled = true;
+      applyBtn.textContent = "…";
+    }
+
     try {
       const res = await fetch("/api/discounts/validate", {
         method: "POST",
@@ -254,14 +303,62 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Invalid discount code.");
       appliedDiscount = { code: code.toUpperCase(), discountAmount: data.discountAmount };
+
+      const coInput = document.getElementById("checkout-discount-code");
+      if (coInput) coInput.value = appliedDiscount.code;
+      const revInput = document.getElementById("review-discount-code");
+      if (revInput) revInput.value = appliedDiscount.code;
+
       updateTotals();
     } catch (err) {
       appliedDiscount = null;
       updateTotals();
-      discountErrorEl.textContent = err.message || "Invalid discount code.";
-      discountErrorEl.classList.remove("hidden");
+      if (errorTargetEl) {
+        errorTargetEl.textContent = err.message || "Invalid discount code.";
+        errorTargetEl.classList.remove("hidden");
+      }
+    } finally {
+      if (applyBtn) {
+        applyBtn.disabled = false;
+        applyBtn.textContent = origText;
+      }
+    }
+  }
+
+  // Sidebar Discount handlers
+  document.getElementById("checkout-discount-apply").addEventListener("click", () => {
+    applyDiscountCode(
+      document.getElementById("checkout-discount-code").value,
+      document.getElementById("checkout-discount-error"),
+      document.getElementById("checkout-discount-apply")
+    );
+  });
+  document.getElementById("checkout-discount-code").addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      applyDiscountCode(
+        document.getElementById("checkout-discount-code").value,
+        document.getElementById("checkout-discount-error"),
+        document.getElementById("checkout-discount-apply")
+      );
     }
   });
+
+  // Modal Discount handlers
+  const reviewDiscountApplyBtn = document.getElementById("review-discount-apply");
+  const reviewDiscountInput = document.getElementById("review-discount-code");
+  const reviewDiscountErrorEl = document.getElementById("review-discount-error");
+  if (reviewDiscountApplyBtn && reviewDiscountInput) {
+    reviewDiscountApplyBtn.addEventListener("click", () => {
+      applyDiscountCode(reviewDiscountInput.value, reviewDiscountErrorEl, reviewDiscountApplyBtn);
+    });
+    reviewDiscountInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        applyDiscountCode(reviewDiscountInput.value, reviewDiscountErrorEl, reviewDiscountApplyBtn);
+      }
+    });
+  }
 
   const reviewModal = document.getElementById("review-modal");
   const reviewPayBtn = document.getElementById("review-pay-btn");
@@ -271,18 +368,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function openReviewModal(customer) {
     document.getElementById("review-items").innerHTML = cartItemsHtml();
-    document.getElementById("review-subtotal").textContent = formatPrice(cartSubtotal());
-    const discountRow = document.getElementById("review-discount-row");
-    if (appliedDiscount) {
-      document.getElementById("review-discount-label").textContent = `Discount (${appliedDiscount.code})`;
-      document.getElementById("review-discount-amount").textContent = `-${formatPrice(appliedDiscount.discountAmount)}`;
-      discountRow.classList.remove("hidden");
-      discountRow.classList.add("flex");
-    } else {
-      discountRow.classList.add("hidden");
-      discountRow.classList.remove("flex");
+    if (reviewDiscountInput) {
+      reviewDiscountInput.value = appliedDiscount ? appliedDiscount.code : document.getElementById("checkout-discount-code").value.trim();
     }
-    document.getElementById("review-total").textContent = document.getElementById("checkout-total").textContent;
+    if (reviewDiscountErrorEl) {
+      reviewDiscountErrorEl.classList.add("hidden");
+    }
+    updateTotals();
     document.getElementById("review-customer").textContent =
       `${customer.firstName} ${customer.surname} — ${customer.address}${customer.phone ? " — " + customer.phone : ""} — ${customer.email}`;
     reviewErrorEl.classList.add("hidden");
