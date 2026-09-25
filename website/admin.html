@@ -64,6 +64,7 @@
       <button id="tab-btn-orders" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Orders <span id="orders-badge" class="ml-1 px-2 py-0.5 rounded-full bg-kit-accent-red text-primary text-[10px] hidden"></span></button>
       <button id="tab-btn-subscribers" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Newsletter</button>
       <button id="tab-btn-reviews" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Reviews <span id="reviews-badge" class="ml-1 px-2 py-0.5 rounded-full bg-kit-accent-red text-primary text-[10px] hidden"></span></button>
+      <button id="tab-btn-discounts" class="admin-tab-btn px-1 pb-4 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-colors">Discounts</button>
     </div>
 
     <div id="products-view" class="flex flex-col gap-8">
@@ -314,8 +315,83 @@
       </div>
     </div>
 
+    <!-- Discounts View -->
+    <div id="discounts-view" class="hidden flex-col gap-8">
+      <div class="flex justify-end">
+        <button id="add-discount-btn" class="px-6 py-3 bg-primary text-pitch-black hover:bg-surface-tint font-label-sm text-label-sm uppercase tracking-widest rounded-sm transition-colors flex items-center gap-2 font-bold">
+          <span class="material-symbols-outlined text-[20px]">add</span>
+          <span>New Discount Code</span>
+        </button>
+      </div>
+      <div class="bg-charcoal-depth border border-stadium-grey rounded-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stadium-grey bg-pitch-black/50 text-xs text-outline uppercase tracking-widest font-label-sm">
+              <th class="p-4">Code</th>
+              <th class="p-4">Discount</th>
+              <th class="p-4">Uses</th>
+              <th class="p-4">Expires</th>
+              <th class="p-4">Status</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="discounts-table-body" class="divide-y divide-stadium-grey text-sm">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </main>
+
+<!-- Discount Modal -->
+<div id="discount-modal" class="fixed inset-0 z-[100] bg-pitch-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-charcoal-depth border border-stadium-grey w-full max-w-md rounded-sm shadow-2xl my-8 overflow-hidden flex flex-col">
+    <div class="px-6 py-4 border-b border-stadium-grey flex items-center justify-between bg-pitch-black/50">
+      <h3 class="font-display-xl text-xl text-primary uppercase">New Discount Code</h3>
+      <button id="discount-modal-close-btn" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <form id="discount-form" class="p-6 space-y-5">
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Code *</label>
+        <input id="discount-form-code" type="text" required placeholder="e.g. WELCOME10" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none uppercase font-mono"/>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Type *</label>
+          <select id="discount-form-type" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none">
+            <option value="percent">Percent Off</option>
+            <option value="fixed">Fixed Amount Off (R)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Value *</label>
+          <input id="discount-form-value" type="number" required min="0" step="0.01" placeholder="10" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Max Uses</label>
+          <input id="discount-form-maxUses" type="number" min="1" placeholder="Unlimited" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Expires On</label>
+          <input id="discount-form-expiresAt" type="date" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+        </div>
+      </div>
+      <label class="flex items-center gap-3 cursor-pointer">
+        <input type="checkbox" id="discount-form-active" checked class="w-4 h-4 accent-primary"/>
+        <span class="text-xs uppercase tracking-widest font-label-sm text-primary">Active</span>
+      </label>
+      <p id="discount-form-error" class="text-xs text-kit-accent-red uppercase tracking-widest hidden"></p>
+      <div class="pt-4 border-t border-stadium-grey flex items-center justify-end gap-3">
+        <button type="button" id="discount-modal-cancel-btn" class="px-5 py-2.5 border border-stadium-grey text-on-surface-variant hover:text-primary text-xs uppercase tracking-widest rounded-sm transition-colors">Cancel</button>
+        <button type="submit" class="px-6 py-2.5 bg-primary text-pitch-black hover:bg-surface-tint font-bold text-xs uppercase tracking-widest rounded-sm transition-colors">Save Code</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- Add / Edit Modal -->
 <div id="product-modal" class="fixed inset-0 z-[100] bg-pitch-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
@@ -685,6 +761,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("tab-btn-orders")?.addEventListener("click", () => switchAdminTab("orders"));
   document.getElementById("tab-btn-subscribers")?.addEventListener("click", () => switchAdminTab("subscribers"));
   document.getElementById("tab-btn-reviews")?.addEventListener("click", () => switchAdminTab("reviews"));
+  document.getElementById("tab-btn-discounts")?.addEventListener("click", () => switchAdminTab("discounts"));
+
+  // Discount modal
+  document.getElementById("add-discount-btn")?.addEventListener("click", openDiscountModal);
+  document.getElementById("discount-modal-close-btn")?.addEventListener("click", closeDiscountModal);
+  document.getElementById("discount-modal-cancel-btn")?.addEventListener("click", closeDiscountModal);
+  document.getElementById("discount-form")?.addEventListener("submit", async e => {
+    e.preventDefault();
+    await saveDiscountFromForm();
+  });
 
   // Search and Filter Listeners
   document.getElementById("admin-search")?.addEventListener("input", renderAdminTable);
@@ -754,7 +840,8 @@ async function switchAdminTab(tab) {
     requests: { btn: document.getElementById("tab-btn-requests"), view: document.getElementById("requests-view") },
     orders: { btn: document.getElementById("tab-btn-orders"), view: document.getElementById("orders-view") },
     subscribers: { btn: document.getElementById("tab-btn-subscribers"), view: document.getElementById("subscribers-view") },
-    reviews: { btn: document.getElementById("tab-btn-reviews"), view: document.getElementById("reviews-view") }
+    reviews: { btn: document.getElementById("tab-btn-reviews"), view: document.getElementById("reviews-view") },
+    discounts: { btn: document.getElementById("tab-btn-discounts"), view: document.getElementById("discounts-view") }
   };
 
   const active = "text-primary border-primary";
@@ -771,6 +858,7 @@ async function switchAdminTab(tab) {
   if (tab === "orders") await renderOrdersTable();
   if (tab === "subscribers") await renderSubscribersTable();
   if (tab === "reviews") await renderReviewsTable();
+  if (tab === "discounts") await renderDiscountsTable();
 }
 
 async function renderSubscribersTable() {
@@ -802,6 +890,95 @@ async function confirmDeleteSubscriber(email) {
   if (confirm(`Remove ${email} from the newsletter list?`)) {
     await fetch(`/api/subscribers/${encodeURIComponent(email)}`, { method: "DELETE", headers: { "X-Admin-Key": getAdminKey() } });
     await renderSubscribersTable();
+  }
+}
+
+async function renderDiscountsTable() {
+  const res = await fetch("/api/admin/discounts", { headers: { "X-Admin-Key": getAdminKey() } });
+  const items = res.ok ? await res.json() : [];
+  const tbody = document.getElementById("discounts-table-body");
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-outline">No discount codes yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = items
+    .map(d => {
+      const discountLabel = d.type === "percent" ? `${d.value}% off` : `${formatPrice(d.value)} off`;
+      const usesLabel = `${d.timesUsed} / ${d.maxUses ?? "∞"}`;
+      const expiresLabel = d.expiresAt ? new Date(d.expiresAt).toLocaleDateString() : "—";
+      const exhausted = d.maxUses !== null && d.timesUsed >= d.maxUses;
+      const expired = d.expiresAt && new Date(d.expiresAt) < new Date();
+      const statusLabel = !d.active ? "Inactive" : expired ? "Expired" : exhausted ? "Used Up" : "Active";
+      const statusStyle = statusLabel === "Active" ? "bg-primary/20 text-primary border-primary/40" : "bg-kit-accent-red/20 text-kit-accent-red border-kit-accent-red/40";
+      return `<tr class="hover:bg-pitch-black/40 transition-colors">
+      <td class="p-4 text-primary font-mono font-bold">${escapeHtml(d.code)}</td>
+      <td class="p-4">${escapeHtml(discountLabel)}</td>
+      <td class="p-4 text-xs text-outline whitespace-nowrap">${escapeHtml(usesLabel)}</td>
+      <td class="p-4 text-xs text-outline whitespace-nowrap">${escapeHtml(expiresLabel)}</td>
+      <td class="p-4"><span class="px-2 py-0.5 text-[10px] uppercase font-bold border rounded-sm ${statusStyle}">${statusLabel}</span></td>
+      <td class="p-4 text-right">
+        <button onclick="confirmDeleteDiscount('${escapeHtml(d.code)}')" class="p-1.5 text-on-surface-variant hover:text-kit-accent-red border border-stadium-grey rounded-sm transition-colors" title="Delete">
+          <span class="material-symbols-outlined text-[18px]">delete</span>
+        </button>
+      </td>
+    </tr>`;
+    })
+    .join("");
+}
+
+function openDiscountModal() {
+  document.getElementById("discount-form").reset();
+  document.getElementById("discount-form-active").checked = true;
+  document.getElementById("discount-form-error").classList.add("hidden");
+  document.getElementById("discount-modal").classList.remove("hidden");
+}
+
+function closeDiscountModal() {
+  document.getElementById("discount-modal").classList.add("hidden");
+}
+
+async function saveDiscountFromForm() {
+  const errorEl = document.getElementById("discount-form-error");
+  const code = document.getElementById("discount-form-code").value.trim();
+  const value = document.getElementById("discount-form-value").value;
+  if (!code || !value) {
+    errorEl.textContent = "Please fill in a code and value.";
+    errorEl.classList.remove("hidden");
+    return;
+  }
+  errorEl.classList.add("hidden");
+
+  const discount = {
+    code,
+    type: document.getElementById("discount-form-type").value,
+    value: Number(value),
+    maxUses: document.getElementById("discount-form-maxUses").value || null,
+    expiresAt: document.getElementById("discount-form-expiresAt").value || null,
+    active: document.getElementById("discount-form-active").checked
+  };
+
+  try {
+    const res = await fetch("/api/admin/discounts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Admin-Key": getAdminKey() },
+      body: JSON.stringify(discount)
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || "Failed to save discount code.");
+    }
+    closeDiscountModal();
+    await renderDiscountsTable();
+  } catch (err) {
+    errorEl.textContent = err.message || "Failed to save discount code.";
+    errorEl.classList.remove("hidden");
+  }
+}
+
+async function confirmDeleteDiscount(code) {
+  if (confirm(`Delete discount code ${code}?`)) {
+    await fetch(`/api/admin/discounts/${encodeURIComponent(code)}`, { method: "DELETE", headers: { "X-Admin-Key": getAdminKey() } });
+    await renderDiscountsTable();
   }
 }
 

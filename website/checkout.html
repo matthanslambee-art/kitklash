@@ -94,10 +94,22 @@
       <h2 class="font-label-sm text-label-sm text-primary uppercase tracking-widest border-b border-stadium-grey pb-4">Order Summary</h2>
       <div id="checkout-items" class="flex flex-col gap-6"></div>
       <hr class="border-t border-stadium-grey"/>
+      <div class="flex flex-col gap-3">
+        <div class="flex gap-2">
+          <input id="checkout-discount-code" type="text" placeholder="Discount code" class="flex-1 min-w-0 bg-transparent border-b border-stadium-grey focus:border-primary outline-none py-2 text-sm text-primary uppercase placeholder:text-outline placeholder:normal-case"/>
+          <button type="button" id="checkout-discount-apply" class="px-4 py-2 border border-stadium-grey text-primary hover:border-primary font-label-sm text-label-sm uppercase tracking-widest transition-colors shrink-0">Apply</button>
+        </div>
+        <p id="checkout-discount-error" class="font-label-sm text-label-sm text-kit-accent-red uppercase tracking-widest hidden"></p>
+      </div>
+      <hr class="border-t border-stadium-grey"/>
       <div class="flex flex-col gap-2">
         <div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
           <span>Subtotal</span>
           <span id="checkout-subtotal">R0</span>
+        </div>
+        <div id="checkout-discount-row" class="hidden justify-between font-label-sm text-label-sm text-primary uppercase tracking-widest">
+          <span id="checkout-discount-label">Discount</span>
+          <span id="checkout-discount-amount">-R0</span>
         </div>
         <div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
           <span>Shipping (Nationwide)</span>
@@ -163,8 +175,49 @@ document.addEventListener("DOMContentLoaded", async () => {
       .join("");
   }
   const SHIPPING_FLAT = 100;
-  document.getElementById("checkout-subtotal").textContent = formatPrice(cartSubtotal());
-  document.getElementById("checkout-total").textContent = formatPrice(cartSubtotal() + SHIPPING_FLAT);
+  let appliedDiscount = null;
+
+  function updateTotals() {
+    const subtotal = cartSubtotal();
+    const discountRow = document.getElementById("checkout-discount-row");
+    const discountAmount = appliedDiscount ? appliedDiscount.discountAmount : 0;
+    document.getElementById("checkout-subtotal").textContent = formatPrice(subtotal);
+    if (appliedDiscount) {
+      document.getElementById("checkout-discount-label").textContent = `Discount (${appliedDiscount.code})`;
+      document.getElementById("checkout-discount-amount").textContent = `-${formatPrice(discountAmount)}`;
+      discountRow.classList.remove("hidden");
+      discountRow.classList.add("flex");
+    } else {
+      discountRow.classList.add("hidden");
+      discountRow.classList.remove("flex");
+    }
+    document.getElementById("checkout-total").textContent = formatPrice(Math.max(0, subtotal - discountAmount) + SHIPPING_FLAT);
+  }
+  updateTotals();
+
+  document.getElementById("checkout-discount-apply").addEventListener("click", async () => {
+    const codeInput = document.getElementById("checkout-discount-code");
+    const discountErrorEl = document.getElementById("checkout-discount-error");
+    const code = codeInput.value.trim();
+    discountErrorEl.classList.add("hidden");
+    if (!code) return;
+    try {
+      const res = await fetch("/api/discounts/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, subtotal: cartSubtotal() })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Invalid discount code.");
+      appliedDiscount = { code: code.toUpperCase(), discountAmount: data.discountAmount };
+      updateTotals();
+    } catch (err) {
+      appliedDiscount = null;
+      updateTotals();
+      discountErrorEl.textContent = err.message || "Invalid discount code.";
+      discountErrorEl.classList.remove("hidden");
+    }
+  });
 
   form.addEventListener("submit", async e => {
     e.preventDefault();
@@ -197,8 +250,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       // The server looks up each item's real price and builds the order total
-      // itself from `cart` — it never trusts a client-computed total/description.
-      const order = await saveNewOrder({ ...customer, items: cart });
+      // itself from `cart` — it never trusts a client-computed total/description
+      // or discount amount; only the discount CODE is passed through, and the
+      // server re-validates and recomputes the discount itself.
+      const order = await saveNewOrder({ ...customer, items: cart, discountCode: appliedDiscount ? appliedDiscount.code : undefined });
       const { redirectUrl } = await createYocoCheckout(order.id);
       window.location.href = redirectUrl;
     } catch (err) {

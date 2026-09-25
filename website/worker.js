@@ -126,6 +126,33 @@ function priceCartItem(item, product) {
   return { lineTotal, description };
 }
 
+async function ensureDiscountsTable(env) {
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS discounts (
+      code TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      value REAL NOT NULL,
+      maxUses INTEGER,
+      timesUsed INTEGER NOT NULL DEFAULT 0,
+      expiresAt TEXT,
+      active INTEGER NOT NULL DEFAULT 1,
+      createdAt TEXT NOT NULL
+    )
+  `).run();
+}
+
+function discountEligibilityError(discount) {
+  if (!discount || !discount.active) return "Invalid discount code.";
+  if (discount.expiresAt && new Date(discount.expiresAt) < new Date()) return "This discount code has expired.";
+  if (discount.maxUses !== null && discount.timesUsed >= discount.maxUses) return "This discount code has reached its usage limit.";
+  return null;
+}
+
+function computeDiscountAmount(discount, subtotal) {
+  const amount = discount.type === "percent" ? subtotal * (discount.value / 100) : discount.value;
+  return Math.min(Math.max(amount, 0), subtotal);
+}
+
 function base64ToBytes(b64) {
   const binStr = atob(b64);
   const bytes = new Uint8Array(binStr.length);
@@ -308,6 +335,21 @@ export default {
           return json({ error: err.message || "Invalid item in bag." }, 400);
         }
 
+        // Discount is applied to the item subtotal, before shipping — checked
+        // and computed server-side from the real discounts table, never from
+        // a client-supplied discount amount.
+        let discountCode = null;
+        if (o.discountCode) {
+          await ensureDiscountsTable(env);
+          discountCode = clampStr(o.discountCode, 40).toUpperCase();
+          const discount = await env.DB.prepare("SELECT * FROM discounts WHERE code = ?").bind(discountCode).first();
+          const eligibilityError = discountEligibilityError(discount);
+          if (eligibilityError) return json({ error: eligibilityError }, 400);
+          const discountAmount = computeDiscountAmount(discount, total);
+          total -= discountAmount;
+          items.push(`Discount (${discountCode}, ${discount.type === "percent" ? discount.value + "%" : "R" + discount.value} off) — -R${discountAmount.toLocaleString("en-ZA", { maximumFractionDigits: 2 })}`);
+        }
+
         // Flat nationwide shipping, added once per order regardless of how
         // many items or fulfillment paths it mixes — items ship separately as
         // each becomes ready, but the customer is only charged once.
@@ -327,6 +369,9 @@ export default {
           record.id, record.createdAt, record.status, record.firstName, record.surname,
           record.email, record.phone, record.address, JSON.stringify(record.items), record.total
         ).run();
+        if (discountCode) {
+          await env.DB.prepare("UPDATE discounts SET timesUsed = timesUsed + 1 WHERE code = ?").bind(discountCode).run();
+        }
         return json(record);
       }
 
@@ -512,6 +557,66 @@ export default {
         if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
         await env.DB.prepare("DELETE FROM subscribers WHERE email = ?").bind(decodeURIComponent(subEmailMatch[1])).run();
         return json({ ok: true });
+      }
+
+      // ---------------- Discount Codes ----------------
+      if (path === "/api/admin/discounts" && method === "GET") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        await ensureDiscountsTable(env);
+        const { results } = await env.DB.prepare("SELECT * FROM discounts ORDER BY createdAt DESC").all();
+        return json(results);
+      }
+
+      if (path === "/api/admin/discounts" && method === "POST") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        await ensureDiscountsTable(env);
+        let d;
+        try { d = await request.json(); } catch { return json({ error: "Invalid request body." }, 400); }
+
+        const code = clampStr(d.code, 40).toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+        if (!code) return json({ error: "Enter a discount code." }, 400);
+        const type = d.type === "fixed" ? "fixed" : "percent";
+        const value = Number(d.value);
+        if (!(value > 0) || (type === "percent" && value > 100)) return json({ error: "Enter a valid discount value." }, 400);
+        const maxUses = d.maxUses ? Math.max(1, Math.round(Number(d.maxUses))) : null;
+        const expiresAt = d.expiresAt ? clampStr(d.expiresAt, 40) : null;
+        const active = d.active !== false ? 1 : 0;
+
+        await env.DB.prepare(`
+          INSERT INTO discounts (code, type, value, maxUses, timesUsed, expiresAt, active, createdAt)
+          VALUES (?,?,?,?,0,?,?,?)
+          ON CONFLICT(code) DO UPDATE SET
+            type = excluded.type, value = excluded.value, maxUses = excluded.maxUses,
+            expiresAt = excluded.expiresAt, active = excluded.active
+        `).bind(code, type, value, maxUses, expiresAt, active, new Date().toISOString()).run();
+        return json({ ok: true });
+      }
+
+      const discountCodeMatch = path.match(/^\/api\/admin\/discounts\/([^/]+)$/);
+      if (discountCodeMatch && method === "DELETE") {
+        if (!(await isAdmin(request, env))) return json({ error: "Unauthorized" }, 401);
+        await ensureDiscountsTable(env);
+        await env.DB.prepare("DELETE FROM discounts WHERE code = ?").bind(decodeURIComponent(discountCodeMatch[1]).toUpperCase()).run();
+        return json({ ok: true });
+      }
+
+      if (path === "/api/discounts/validate" && method === "POST") {
+        if (!(await rateLimit(env, "discount-validate", getClientIp(request), 20, 300))) {
+          return json({ error: "Too many attempts. Please try again shortly." }, 429);
+        }
+        await ensureDiscountsTable(env);
+        let body;
+        try { body = await request.json(); } catch { return json({ error: "Invalid request." }, 400); }
+        const code = clampStr(body.code, 40).toUpperCase();
+        const subtotal = Number(body.subtotal) || 0;
+        if (!code) return json({ error: "Enter a discount code." }, 400);
+
+        const discount = await env.DB.prepare("SELECT * FROM discounts WHERE code = ?").bind(code).first();
+        const eligibilityError = discountEligibilityError(discount);
+        if (eligibilityError) return json({ error: eligibilityError }, 400);
+
+        const discountAmount = computeDiscountAmount(discount, subtotal);
+        return json({ valid: true, type: discount.type, value: discount.value, discountAmount });
       }
 
       // ---------------- Reviews ----------------
