@@ -469,13 +469,29 @@
         <div>
           <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Category *</label>
           <select id="form-category" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none">
+            <option value="modern" selected>Modern</option>
             <option value="vintage">Vintage</option>
-            <option value="modern">Modern</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Price (R ZAR) *</label>
-          <input id="form-price" type="number" required placeholder="250" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs uppercase tracking-widest text-outline font-label-sm">Pricing *</label>
+            <div class="flex items-center gap-2 text-[10px] font-mono">
+              <label class="flex items-center gap-1 cursor-pointer text-primary">
+                <input type="radio" name="form-pricing-mode" id="pricing-mode-standard" value="standard" checked class="accent-primary"/>
+                <span>Standard Model</span>
+              </label>
+              <label class="flex items-center gap-1 cursor-pointer text-on-surface-variant hover:text-primary">
+                <input type="radio" name="form-pricing-mode" id="pricing-mode-custom" value="custom" class="accent-primary"/>
+                <span>Custom Price</span>
+              </label>
+            </div>
+          </div>
+          <div class="relative">
+            <input id="form-price" type="number" required placeholder="449" class="w-full bg-pitch-black border border-stadium-grey focus:border-primary px-3 py-2 text-sm text-primary rounded-sm outline-none"/>
+            <span id="form-price-badge" class="absolute right-2 top-2 text-[10px] uppercase font-mono px-1.5 py-0.5 bg-primary/20 text-primary border border-primary/40 rounded pointer-events-none">Fan/Player</span>
+          </div>
+          <p id="form-pricing-hint" class="text-[10px] text-outline mt-1 font-mono">Modern model: Fan R449/499 · Player R649/699</p>
         </div>
         <div>
           <label class="block text-xs uppercase tracking-widest text-outline mb-1 font-label-sm">Badge Label</label>
@@ -506,11 +522,11 @@
       <div>
         <label class="block text-xs uppercase tracking-widest text-outline mb-2 font-label-sm">Available Sizes</label>
         <div class="flex flex-wrap gap-4 text-xs font-mono">
-          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="S" class="accent-primary"/> S</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="S" checked class="accent-primary"/> S</label>
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="M" checked class="accent-primary"/> M</label>
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="L" checked class="accent-primary"/> L</label>
-          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="XL" class="accent-primary"/> XL</label>
-          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="2XL" class="accent-primary"/> 2XL</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="XL" checked class="accent-primary"/> XL</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="2XL" checked class="accent-primary"/> 2XL</label>
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="3XL" class="accent-primary"/> 3XL</label>
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-size" value="4XL" class="accent-primary"/> 4XL</label>
         </div>
@@ -521,7 +537,7 @@
         <label class="block text-xs uppercase tracking-widest text-outline mb-2 font-label-sm">Versions Available</label>
         <div class="flex flex-wrap gap-6 text-xs font-mono">
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-version" value="fan" checked class="accent-primary"/> Fan Version</label>
-          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-version" value="player" class="accent-primary"/> Player Version</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="form-version" value="player" checked class="accent-primary"/> Player Version</label>
         </div>
         <p class="text-[10px] text-outline mt-2">If both are checked, customers get a Fan / Player toggle on the product page. If only one is checked, no toggle is shown.</p>
       </div>
@@ -798,6 +814,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       slugInput.value = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
     }
   });
+
+  // Product Form Pricing & Version Listeners
+  document.getElementById("form-category")?.addEventListener("change", () => updateProductFormPricingUI("category"));
+  document.getElementById("form-badge")?.addEventListener("change", () => updateProductFormPricingUI("badge"));
+  document.querySelectorAll('input[name="form-pricing-mode"]').forEach(r => {
+    r.addEventListener("change", () => updateProductFormPricingUI("mode"));
+  });
+  document.getElementById("form-price")?.addEventListener("input", () => updateProductFormPricingUI("price-input"));
 
   // Form Submit
   document.getElementById("product-form")?.addEventListener("submit", async (e) => {
@@ -1280,7 +1304,7 @@ async function renderAdminTable() {
       <td class="p-4">
         <span class="px-2 py-0.5 rounded-sm text-xs font-mono uppercase border ${p.category === 'vintage' ? 'border-primary/40 text-primary bg-primary/10' : 'border-outline/40 text-on-surface-variant'}">${p.category}</span>
       </td>
-      <td class="p-4 font-mono font-bold text-primary">${formatPrice(p.price)}</td>
+      <td class="p-4 font-mono font-bold text-primary">${isCustomizable(p) ? 'From ' + formatPrice(getDisplayFromPrice(p)) : formatPrice(p.price)}</td>
       <td class="p-4">
         <div class="flex flex-wrap gap-1">
           ${p.soldOut ? '<span class="px-2 py-0.5 text-[10px] uppercase font-bold bg-kit-accent-red/20 text-kit-accent-red border border-kit-accent-red/40 rounded-sm">Sold Out</span>' : '<span class="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-500/20 text-green-400 border border-green-500/40 rounded-sm">Available</span>'}
@@ -1303,6 +1327,85 @@ async function renderAdminTable() {
       </td>
     </tr>
   `).join("");
+}
+
+function updateProductFormPricingUI(trigger) {
+  const category = document.getElementById("form-category").value;
+  const badge = document.getElementById("form-badge").value;
+  const standardRadio = document.getElementById("pricing-mode-standard");
+  const customRadio = document.getElementById("pricing-mode-custom");
+  const priceInput = document.getElementById("form-price");
+  const hintEl = document.getElementById("form-pricing-hint");
+  const badgeEl = document.getElementById("form-price-badge");
+  const fanCb = document.querySelector('input[name="form-version"][value="fan"]');
+  const playerCb = document.querySelector('input[name="form-version"][value="player"]');
+
+  if (trigger === "category") {
+    if (category === "modern") {
+      standardRadio.checked = true;
+      if (badge === "Kids") {
+        priceInput.value = KIDS_PRICING.jersey.short;
+      } else {
+        priceInput.value = MODERN_PRICING.fan.short;
+        if (fanCb) fanCb.checked = true;
+        if (playerCb) playerCb.checked = true;
+      }
+    } else {
+      // Vintage defaults to custom price
+      customRadio.checked = true;
+      if (!priceInput.value || priceInput.value == MODERN_PRICING.fan.short || priceInput.value == KIDS_PRICING.jersey.short) {
+        priceInput.value = 750;
+      }
+      if (fanCb) fanCb.checked = true;
+      if (playerCb) playerCb.checked = false;
+    }
+  } else if (trigger === "badge") {
+    if (badge === "Kids") {
+      standardRadio.checked = true;
+      priceInput.value = KIDS_PRICING.jersey.short;
+    } else if (category === "modern" && standardRadio.checked) {
+      priceInput.value = MODERN_PRICING.fan.short;
+      if (fanCb) fanCb.checked = true;
+      if (playerCb) playerCb.checked = true;
+    }
+  } else if (trigger === "mode") {
+    if (standardRadio.checked) {
+      if (badge === "Kids") {
+        priceInput.value = KIDS_PRICING.jersey.short;
+      } else if (category === "modern") {
+        priceInput.value = MODERN_PRICING.fan.short;
+        if (fanCb) fanCb.checked = true;
+        if (playerCb) playerCb.checked = true;
+      } else {
+        priceInput.value = VINTAGE_PRICING.fan.short;
+      }
+    }
+  } else if (trigger === "price-input") {
+    const num = parseFloat(priceInput.value);
+    if (category === "modern" && badge !== "Kids") {
+      if (num !== MODERN_PRICING.fan.short) {
+        customRadio.checked = true;
+      }
+    }
+  }
+
+  // Visual cues
+  if (standardRadio.checked) {
+    if (badge === "Kids") {
+      hintEl.textContent = "Kids model: Jersey R400 · Set R450";
+      badgeEl.textContent = "Kids Model";
+    } else if (category === "modern") {
+      hintEl.textContent = "Modern model: Fan R449/499 · Player R649/699";
+      badgeEl.textContent = "Fan/Player";
+    } else {
+      hintEl.textContent = "Vintage model: Fan R700 (SS) / R800 (LS)";
+      badgeEl.textContent = "Vintage Model";
+    }
+    badgeEl.classList.remove("hidden");
+  } else {
+    hintEl.textContent = "Custom fixed price applied (ZAR).";
+    badgeEl.classList.add("hidden");
+  }
 }
 
 function openProductModal(editingSlug = "") {
@@ -1331,7 +1434,7 @@ function openProductModal(editingSlug = "") {
       document.getElementById("form-league").value = p.league || "other-clubs";
       document.getElementById("form-country").value = p.country || "";
       document.getElementById("form-kitType").value = p.kitType || "Home";
-      document.getElementById("form-category").value = p.category || "vintage";
+      document.getElementById("form-category").value = p.category || "modern";
       document.getElementById("form-price").value = p.price || 0;
       document.getElementById("form-badge").value = p.badge || "";
       document.getElementById("form-condition").value = p.condition || "";
@@ -1366,7 +1469,26 @@ function openProductModal(editingSlug = "") {
       document.querySelectorAll('input[name="form-version"]').forEach(cb => {
         cb.checked = existingVersions.includes(cb.value);
       });
+
+      // Pricing mode setup
+      if (p.pricing) {
+        document.getElementById("pricing-mode-standard").checked = true;
+      } else {
+        document.getElementById("pricing-mode-custom").checked = true;
+      }
+      updateProductFormPricingUI("init");
     }
+  } else {
+    // Add New Kit defaults: Modern with standard Fan/Player model active
+    document.getElementById("form-category").value = "modern";
+    document.getElementById("pricing-mode-standard").checked = true;
+    document.querySelectorAll('input[name="form-size"]').forEach(cb => {
+      cb.checked = ["S", "M", "L", "XL", "2XL"].includes(cb.value);
+    });
+    document.querySelectorAll('input[name="form-version"]').forEach(cb => {
+      cb.checked = true;
+    });
+    updateProductFormPricingUI("category");
   }
 
   document.getElementById("product-modal").classList.remove("hidden");
@@ -1511,10 +1633,49 @@ async function saveProductFromForm() {
     slug = editSlug; // retain original slug when editing
   }
 
+  const category = document.getElementById("form-category").value;
+  const badge = document.getElementById("form-badge").value || null;
+  const pricingMode = document.querySelector('input[name="form-pricing-mode"]:checked')?.value || "standard";
+  const rawPrice = parseFloat(document.getElementById("form-price").value) || 0;
+
   const sizes = Array.from(document.querySelectorAll('input[name="form-size"]:checked')).map(cb => cb.value);
   const versions = Array.from(document.querySelectorAll('input[name="form-version"]:checked')).map(cb => cb.value);
   const galleryRaw = document.getElementById("form-gallery").value.trim();
   const gallery = galleryRaw ? galleryRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+
+  let pricing = null;
+  let customizable = false;
+  let finalPrice = rawPrice;
+  let finalVersions = versions.length ? versions : ["fan"];
+
+  if (pricingMode === "standard") {
+    if (badge === "Kids") {
+      pricing = KIDS_PRICING;
+      customizable = true;
+      finalPrice = KIDS_PRICING.jersey.short;
+      finalVersions = ["jersey", "set"];
+    } else if (category === "modern") {
+      pricing = {};
+      if (versions.includes("fan")) pricing.fan = MODERN_PRICING.fan;
+      if (versions.includes("player")) pricing.player = MODERN_PRICING.player;
+      if (!Object.keys(pricing).length) {
+        pricing = MODERN_PRICING;
+        finalVersions = ["fan", "player"];
+      }
+      customizable = true;
+      finalPrice = pricing.fan ? pricing.fan.short : (pricing.player ? pricing.player.short : MODERN_PRICING.fan.short);
+    } else if (category === "vintage") {
+      pricing = VINTAGE_PRICING;
+      customizable = true;
+      finalPrice = VINTAGE_PRICING.fan.short;
+      finalVersions = ["fan"];
+    }
+  } else {
+    // Custom price entered by user
+    pricing = null;
+    customizable = false;
+    finalPrice = rawPrice;
+  }
 
   const productObj = {
     slug,
@@ -1525,15 +1686,17 @@ async function saveProductFromForm() {
     league: document.getElementById("form-league").value,
     country: document.getElementById("form-country").value.trim(),
     kitType: document.getElementById("form-kitType").value,
-    category: document.getElementById("form-category").value,
+    category: badge === "Kids" ? "modern" : category,
     condition: document.getElementById("form-condition").value.trim() || "Mint Condition",
-    price: parseFloat(document.getElementById("form-price").value) || 0,
-    badge: document.getElementById("form-badge").value || null,
+    price: finalPrice,
+    pricing: pricing,
+    customizable: customizable,
+    badge: badge,
     onHand: document.getElementById("form-onHand").checked,
     latestDrop: document.getElementById("form-latestDrop").checked,
     soldOut: document.getElementById("form-soldOut").checked,
-    sizes: sizes.length ? sizes : ["M", "L"],
-    versions: versions.length ? versions : ["fan"],
+    sizes: badge === "Kids" ? KIDS_SIZES : (sizes.length ? sizes : ["M", "L"]),
+    versions: finalVersions,
     img: document.getElementById("form-img").value.trim(),
     gallery: gallery.length ? gallery : [document.getElementById("form-img").value.trim()],
     story: document.getElementById("form-story").value.trim(),
@@ -1630,10 +1793,6 @@ const TRACKSUIT_STYLES = [
   { name: "Retro Track Top", price: 749 },
   { name: "Windbreaker", price: 899 }
 ];
-const MODERN_PRICING = { fan: { short: 449, long: 499 }, player: { short: 649, long: 699 } };
-const VINTAGE_PRICING = { fan: { short: 700, long: 800 } };
-const KIDS_PRICING = { jersey: { short: 400 }, set: { short: 450 } };
-const KIDS_SIZES = ["3-4Y", "5-6Y", "7-8Y", "9-10Y", "11-12Y", "13-14Y"];
 
 const bulkState = { mode: "jersey", rows: [], nextId: 1 };
 

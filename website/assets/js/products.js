@@ -149,6 +149,11 @@ function getVersions(p) {
   return p.versions && p.versions.length ? p.versions : ["fan"];
 }
 
+const MODERN_PRICING = { fan: { short: 449, long: 499 }, player: { short: 649, long: 699 } };
+const VINTAGE_PRICING = { fan: { short: 700, long: 800 } };
+const KIDS_PRICING = { jersey: { short: 400 }, set: { short: 450 } };
+const KIDS_SIZES = ["3-4Y", "5-6Y", "7-8Y", "9-10Y", "11-12Y", "13-14Y"];
+
 const VERSION_LABELS = { fan: "Fan Version", player: "Player Version", jersey: "Jersey Only", set: "Full Set" };
 function versionLabel(v) {
   return VERSION_LABELS[v] || v;
