@@ -6,7 +6,8 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
   "X-Frame-Options": "DENY",
-  "Content-Security-Policy": "frame-ancestors 'none'"
+  "Content-Security-Policy": "frame-ancestors 'none'",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
 };
 
 function json(data, status = 200) {
@@ -211,6 +212,11 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
+
+    // Enforce HTTPS on production for all Worker and API routes
+    if (url.protocol === "http:" && !url.hostname.includes("localhost") && !url.hostname.includes("127.0.0.1")) {
+      return Response.redirect(`https://${url.host}${url.pathname}${url.search}`, 301);
+    }
 
     try {
       // ---------------- Sitemap ----------------
@@ -443,6 +449,11 @@ export default {
         if (!(amount > 0)) return json({ error: "Order has no payable amount." }, 400);
 
         const secretKey = await env.YOCO_SECRET_KEY.get();
+        // Return URLs must ALWAYS use https:// in production — Yoco strictly rejects http:// URLs
+        const origin = (url.hostname === "localhost" || url.hostname === "127.0.0.1")
+          ? url.origin
+          : `https://${url.host}`;
+
         const yocoRes = await fetch("https://payments.yoco.com/api/checkouts", {
           method: "POST",
           headers: { "Authorization": `Bearer ${secretKey}`, "Content-Type": "application/json" },
@@ -450,13 +461,14 @@ export default {
             amount: Math.round(amount * 100),
             currency: "ZAR",
             metadata: { orderId },
-            successUrl: `${url.origin}/checkout-success.html?order=${encodeURIComponent(orderId)}`,
-            cancelUrl: `${url.origin}/checkout.html`,
-            failureUrl: `${url.origin}/checkout.html?payment=failed`
+            successUrl: `${origin}/checkout-success.html?order=${encodeURIComponent(orderId)}`,
+            cancelUrl: `${origin}/checkout.html`,
+            failureUrl: `${origin}/checkout.html?payment=failed`
           })
         });
         if (!yocoRes.ok) {
-          console.error("Yoco checkout creation failed", yocoRes.status, await yocoRes.text().catch(() => ""));
+          const detail = await yocoRes.text().catch(() => "");
+          console.error("Yoco checkout creation failed", yocoRes.status, detail);
           return json({ error: "Failed to start payment. Please try again." }, 502);
         }
         const data = await yocoRes.json();

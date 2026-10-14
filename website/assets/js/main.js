@@ -1,5 +1,10 @@
 /* KITKLASH shared front-end logic: layout injection, cart, search, nav, product cards. */
 
+// Force HTTPS on production so browsers and API calls never stay on insecure HTTP
+if (location.protocol === "http:" && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
+  location.replace("https://" + location.host + location.pathname + location.search + location.hash);
+}
+
 const CART_KEY = "kitklash_cart";
 const ADMIN_KEY_STORAGE = "kitklash_admin_key";
 
