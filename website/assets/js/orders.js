@@ -12,8 +12,15 @@ async function getOrders() {
   return res.json();
 }
 
+function apiUrl(endpoint) {
+  if (typeof location !== "undefined" && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
+    return `https://${location.host}${endpoint}`;
+  }
+  return endpoint;
+}
+
 async function saveNewOrder(order) {
-  const res = await fetch("/api/orders", {
+  const res = await fetch(apiUrl("/api/orders"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(order)
@@ -60,7 +67,7 @@ async function deleteOrder(id) {
    returns its redirectUrl. The Worker looks up the order's server-computed
    total itself — it never trusts a client-supplied amount. */
 async function createYocoCheckout(orderId) {
-  const res = await fetch("/api/yoco/create-checkout", {
+  const res = await fetch(apiUrl("/api/yoco/create-checkout"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ orderId })
