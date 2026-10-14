@@ -213,9 +213,9 @@ export default {
     const path = url.pathname;
     const method = request.method;
 
-    // Enforce HTTPS on production for all Worker and API routes
+    // Enforce HTTPS on production for all Worker and API routes (308 preserves POST method and body)
     if (url.protocol === "http:" && !url.hostname.includes("localhost") && !url.hostname.includes("127.0.0.1")) {
-      return Response.redirect(`https://${url.host}${url.pathname}${url.search}`, 301);
+      return Response.redirect(`https://${url.host}${url.pathname}${url.search}`, 308);
     }
 
     try {
